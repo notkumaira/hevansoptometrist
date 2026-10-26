@@ -4,18 +4,40 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>H Evans Optometrist | Book an Eye Test</title>
-<meta name="theme-color" content="#15120d">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#15120d" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..700&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
+/* Light mode (default): blue and white */
+:root{
+ --ink:#ffffff;--ink-2:#f1f8fb;--ink-3:#e3f1f7;
+ --paper:#141f4a;--paper-dim:#454f7d;--muted:#6a7399;
+ --amber:#34accb;--amber-d:#2889a3;--rust:#1d6a85;
+ --line:rgba(20,31,74,.12);--line-2:rgba(20,31,74,.24);
+ --on-accent:#ffffff;--hdr:rgba(255,255,255,.8);
+ --glow:rgba(52,172,203,.16);--glow-2:rgba(29,106,133,.05);--glow-soft:rgba(52,172,203,.08);--accent-shadow:rgba(52,172,203,.5);--iris-glow:rgba(52,172,203,.32);
+ --ball-1:#e8f6fa;--ball-2:#c4e5ef;--ring:rgba(20,31,74,.03);--sh:rgba(20,31,74,.35);
+ --pupil:#0a1033;--iris-lines:rgba(10,16,51,.4);--i1:#a9e3f2;--i4:#134a5f;--i5:#0a1033;--lid:#c4e5ef;
+ --bk-bg:#e6f4f9;--bk-ink:#141f4a;--bk-rgb:20,31,74;--bk-accent:#34accb;--bk-sub:#505a8a;--bk-hint:#5f6993;--bk-card:#ffffff;--bk-field:#f4fafc;--bk-ring:rgba(52,172,203,.22);--bk-err:#b3261e;--bk-shadow:rgba(20,31,74,.3);--slot-on:#ffffff;
+ --serif:"Fraunces",Georgia,serif;--sans:"Bricolage Grotesque",ui-sans-serif,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+ color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+/* Dark mode: the original palette */
+@media (prefers-color-scheme:dark){
 :root{
  --ink:#15120d;--ink-2:#1e1a13;--ink-3:#2a241a;
  --paper:#f2e9d8;--paper-dim:#bfb39b;--muted:#8f8470;
  --amber:#eea84a;--amber-d:#d98d2b;--rust:#c8643b;
  --line:rgba(242,233,216,.13);--line-2:rgba(242,233,216,.24);
- --serif:"Fraunces",Georgia,serif;--sans:"Bricolage Grotesque",ui-sans-serif,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
- color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+ --on-accent:#15120d;--hdr:rgba(21,18,13,.72);
+ --glow:rgba(238,168,74,.16);--glow-2:rgba(200,100,59,.06);--glow-soft:rgba(238,168,74,.09);--accent-shadow:rgba(238,168,74,.55);--iris-glow:rgba(238,168,74,.25);
+ --ball-1:#2e271c;--ball-2:#15120d;--ring:rgba(242,233,216,.025);--sh:rgba(0,0,0,.8);
+ --pupil:#15120d;--iris-lines:rgba(21,18,13,.5);--i1:#f6c372;--i4:#5a2c17;--i5:#20160d;--lid:#15120d;
+ --bk-bg:#f2e9d8;--bk-ink:#15120d;--bk-rgb:21,18,13;--bk-accent:#c8643b;--bk-sub:#6b604d;--bk-hint:#7a6f5b;--bk-card:#fbf6ec;--bk-field:#f2e9d8;--bk-ring:rgba(200,100,59,.16);--bk-err:#a8321a;--bk-shadow:rgba(60,40,10,.45);--slot-on:#eea84a;
+ color-scheme:dark
+}
 }
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px);scroll-behavior:smooth}
 *{box-sizing:border-box}
@@ -25,16 +47,16 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;op
 h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.02;margin:0 0 .5em;letter-spacing:-.02em;font-variation-settings:"opsz" 144}
 em{font-style:italic;color:var(--amber)}
 a{color:var(--amber)}
-::selection{background:var(--amber);color:var(--ink)}
+::selection{background:var(--amber);color:var(--on-accent)}
 .wrap{max-width:1200px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
 .mono{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 
 /* header */
-header{position:sticky;top:0;z-index:40;background:rgba(21,18,13,.72);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:40;background:var(--hdr);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);border-bottom:1px solid var(--line)}
 header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--paper);font-family:var(--serif);font-size:1.25rem;letter-spacing:-.01em}
 .logo i{font-style:italic;color:var(--amber)}
-.logo svg{width:30px;height:30px}
+.logo svg{width:30px;height:30px;color:var(--amber)}
 nav{display:flex;align-items:center;gap:28px}
 nav a.link{color:var(--paper-dim);text-decoration:none;font-size:.92rem;position:relative}
 nav a.link::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1px;background:var(--amber);transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
@@ -43,22 +65,22 @@ nav a.link:hover::after{transform:scaleX(1);transform-origin:left}
 @media (max-width:720px){nav a.link{display:none}}
 
 /* buttons */
-.btn{--bg:var(--amber);display:inline-flex;align-items:center;gap:10px;background:var(--bg);color:var(--ink);border:0;border-radius:999px;padding:14px 24px;font:600 .98rem var(--sans);text-decoration:none;cursor:pointer;position:relative;overflow:hidden;isolation:isolate;transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
+.btn{--bg:var(--amber);display:inline-flex;align-items:center;gap:10px;background:var(--bg);color:var(--on-accent);border:0;border-radius:999px;padding:14px 24px;font:600 .98rem var(--sans);text-decoration:none;cursor:pointer;position:relative;overflow:hidden;isolation:isolate;transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
 .btn::before{content:"";position:absolute;inset:0;background:var(--paper);transform:translateY(101%);transition:transform .4s cubic-bezier(.2,.7,.2,1);z-index:-1;border-radius:inherit}
 .btn:hover::before{transform:translateY(0)}
-.btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px rgba(238,168,74,.55)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px var(--accent-shadow)}
 .btn:active{transform:translateY(0) scale(.98)}
 .btn:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
 .btn .arr{transition:transform .3s}
 .btn:hover .arr{transform:translateX(4px)}
 .btn.sm{padding:10px 18px;font-size:.88rem}
 .btn.ghost{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px var(--line-2)}
-.btn.ghost:hover{color:var(--ink)}
+.btn.ghost:hover{color:var(--on-accent)}
 .btn[disabled]{opacity:.6;cursor:progress}
 
 /* hero */
 .hero{position:relative;padding:clamp(48px,8vw,110px) 0 clamp(56px,8vw,96px);overflow:hidden}
-.hero::after{content:"";position:absolute;width:900px;height:900px;right:-300px;top:-260px;border-radius:50%;background:radial-gradient(circle,rgba(238,168,74,.16),rgba(200,100,59,.06) 40%,transparent 68%);pointer-events:none;z-index:-1}
+.hero::after{content:"";position:absolute;width:900px;height:900px;right:-300px;top:-260px;border-radius:50%;background:radial-gradient(circle,var(--glow),var(--glow-2) 40%,transparent 68%);pointer-events:none;z-index:-1}
 .hero .wrap{display:grid;grid-template-columns:1fr;gap:56px;align-items:center}
 @media (min-width:920px){.hero .wrap{grid-template-columns:1.25fr 1fr}}
 .eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:28px}
@@ -77,15 +99,15 @@ nav a.link:hover::after{transform:scaleX(1);transform-origin:left}
 .lens .ring{position:absolute;inset:0;animation:spin 38s linear infinite}
 .lens .ring text{font:500 10.5px var(--mono);letter-spacing:4.2px;fill:var(--paper-dim);text-transform:uppercase}
 @keyframes spin{to{transform:rotate(360deg)}}
-.lens .ball{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2e271c,#15120d 70%);box-shadow:inset 0 0 0 1px var(--line-2),0 40px 80px -30px rgba(0,0,0,.8),0 0 0 14px rgba(242,233,216,.025),0 0 0 15px var(--line);overflow:hidden}
+.lens .ball{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--ball-1),var(--ball-2) 70%);box-shadow:inset 0 0 0 1px var(--line-2),0 40px 80px -30px var(--sh),0 0 0 14px var(--ring),0 0 0 15px var(--line);overflow:hidden}
 .lens .iris{position:absolute;left:50%;top:50%;width:62%;aspect-ratio:1;margin:-31% 0 0 -31%;border-radius:50%;transition:transform .25s ease-out;
  background:
- radial-gradient(circle,var(--ink) 0 27%,transparent 28%),
- repeating-conic-gradient(from 0deg,rgba(21,18,13,.5) 0 2deg,transparent 2deg 7deg),
- radial-gradient(circle,#f6c372 28%,var(--amber) 42%,var(--rust) 62%,#5a2c17 78%,#20160d 80%);
- box-shadow:0 0 60px rgba(238,168,74,.25)}
+ radial-gradient(circle,var(--pupil) 0 27%,transparent 28%),
+ repeating-conic-gradient(from 0deg,var(--iris-lines) 0 2deg,transparent 2deg 7deg),
+ radial-gradient(circle,var(--i1) 28%,var(--amber) 42%,var(--rust) 62%,var(--i4) 78%,var(--i5) 80%);
+ box-shadow:0 0 60px var(--iris-glow)}
 .lens .iris::after{content:"";position:absolute;width:15%;height:15%;left:56%;top:24%;border-radius:50%;background:rgba(255,248,232,.9);filter:blur(.5px)}
-.lens .lid{position:absolute;inset:12%;border-radius:50%;pointer-events:none;background:linear-gradient(var(--ink),var(--ink)) top/100% 0 no-repeat,linear-gradient(var(--ink),var(--ink)) bottom/100% 0 no-repeat;animation:blink 7s 3s infinite}
+.lens .lid{position:absolute;inset:12%;border-radius:50%;pointer-events:none;background:linear-gradient(var(--lid),var(--lid)) top/100% 0 no-repeat,linear-gradient(var(--lid),var(--lid)) bottom/100% 0 no-repeat;animation:blink 7s 3s infinite}
 @keyframes blink{0%,94%,100%{background-size:100% 0,100% 0}97%{background-size:100% 51%,100% 51%}}
 .lens .tag{position:absolute;right:-4%;bottom:10%;background:var(--paper);color:var(--ink);padding:10px 14px;border-radius:14px;font-size:.82rem;line-height:1.3;transform:rotate(-4deg);box-shadow:0 18px 40px -16px rgba(0,0,0,.7)}
 .lens .tag b{font-family:var(--serif);font-weight:500;font-size:1.05rem;display:block}
@@ -108,47 +130,47 @@ section{padding:clamp(72px,10vw,128px) 0;position:relative}
 .sec-head .num{font-family:var(--mono);font-size:.78rem;color:var(--amber);letter-spacing:.14em}
 
 /* booking */
-#book{background:var(--paper);color:var(--ink);border-radius:clamp(24px,4vw,48px) clamp(24px,4vw,48px) 0 0}
-#book em{color:var(--rust)}
-#book .sec-head .num{color:var(--rust)}
+#book{background:var(--bk-bg);color:var(--bk-ink);border-radius:clamp(24px,4vw,48px) clamp(24px,4vw,48px) 0 0}
+#book em{color:var(--bk-accent)}
+#book .sec-head .num{color:var(--bk-accent)}
 .book-grid{display:grid;gap:40px}
 @media (min-width:920px){.book-grid{grid-template-columns:320px 1fr;gap:64px}}
 .steps{list-style:none;margin:0;padding:0;display:grid;gap:0;align-self:start;position:sticky;top:100px}
-.steps li{display:grid;grid-template-columns:44px 1fr;padding:18px 0;border-top:1px solid rgba(21,18,13,.14)}
-.steps li:last-child{border-bottom:1px solid rgba(21,18,13,.14)}
-.steps li b{font:500 .78rem var(--mono);color:var(--rust);padding-top:4px}
+.steps li{display:grid;grid-template-columns:44px 1fr;padding:18px 0;border-top:1px solid rgba(var(--bk-rgb),.14)}
+.steps li:last-child{border-bottom:1px solid rgba(var(--bk-rgb),.14)}
+.steps li b{font:500 .78rem var(--mono);color:var(--bk-accent);padding-top:4px}
 .steps li strong{display:block;font-family:var(--serif);font-weight:500;font-size:1.2rem}
-.steps li span{color:#6b604d;font-size:.92rem}
-.steps .note{margin-top:20px;font-size:.88rem;color:#6b604d;border:0;display:block;padding:0}
+.steps li span{color:var(--bk-sub);font-size:.92rem}
+.steps .note{margin-top:20px;font-size:.88rem;color:var(--bk-sub);border:0;display:block;padding:0}
 @media (max-width:919px){.steps{position:static}}
-.card{background:#fbf6ec;border:1px solid rgba(21,18,13,.1);border-radius:28px;padding:clamp(22px,3.4vw,44px);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 40px 80px -50px rgba(60,40,10,.45)}
+.card{background:var(--bk-card);border:1px solid rgba(var(--bk-rgb),.1);border-radius:28px;padding:clamp(22px,3.4vw,44px);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 40px 80px -50px var(--bk-shadow)}
 .grid2{display:grid;gap:0 20px;grid-template-columns:1fr}
 @media (min-width:640px){.grid2{grid-template-columns:1fr 1fr}}
 .field{margin-bottom:22px}
-label{display:block;font:500 .7rem var(--mono);letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px;color:#6b604d}
-input,select,textarea{width:100%;padding:14px 16px;border:1px solid rgba(21,18,13,.18);border-radius:14px;background:var(--paper);color:var(--ink);font:inherit;font-size:1rem;transition:border-color .2s,box-shadow .2s,background .2s;color-scheme:light}
+label{display:block;font:500 .7rem var(--mono);letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px;color:var(--bk-sub)}
+input,select,textarea{width:100%;padding:14px 16px;border:1px solid rgba(var(--bk-rgb),.18);border-radius:14px;background:var(--bk-field);color:var(--bk-ink);font:inherit;font-size:1rem;transition:border-color .2s,box-shadow .2s,background .2s;color-scheme:light}
 select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2315120d' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
-input:hover,select:hover,textarea:hover{border-color:rgba(21,18,13,.35)}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--rust);box-shadow:0 0 0 4px rgba(200,100,59,.16);background:#fff}
+input:hover,select:hover,textarea:hover{border-color:rgba(var(--bk-rgb),.35)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--bk-accent);box-shadow:0 0 0 4px var(--bk-ring);background:#fff}
 textarea{resize:vertical}
 .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px}
-.slot{padding:12px 0;border:1px solid rgba(21,18,13,.16);background:var(--paper);color:var(--ink);border-radius:12px;font:500 .88rem var(--mono);cursor:pointer;transition:transform .2s,background .2s,border-color .2s,color .2s;opacity:0;animation:pop .4s cubic-bezier(.2,.7,.2,1) forwards}
-.slot:hover{border-color:var(--ink);transform:translateY(-2px)}
-.slot:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
-.slot[aria-pressed="true"]{background:var(--ink);color:var(--amber);border-color:var(--ink);transform:translateY(-2px);box-shadow:0 10px 20px -10px rgba(21,18,13,.6)}
+.slot{padding:12px 0;border:1px solid rgba(var(--bk-rgb),.16);background:var(--bk-field);color:var(--bk-ink);border-radius:12px;font:500 .88rem var(--mono);cursor:pointer;transition:transform .2s,background .2s,border-color .2s,color .2s;opacity:0;animation:pop .4s cubic-bezier(.2,.7,.2,1) forwards}
+.slot:hover{border-color:var(--bk-ink);transform:translateY(-2px)}
+.slot:focus-visible{outline:2px solid var(--bk-accent);outline-offset:2px}
+.slot[aria-pressed="true"]{background:var(--bk-ink);color:var(--slot-on);border-color:var(--bk-ink);transform:translateY(-2px);box-shadow:0 10px 20px -10px rgba(var(--bk-rgb),.6)}
 @keyframes pop{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
-.hint{color:#7a6f5b;font-size:.9rem;margin:10px 0 0}
-.err{color:#a8321a;font-size:.92rem;min-height:1.3em;margin:4px 0 14px;font-weight:500}
-#book .btn{--bg:var(--ink);color:var(--paper)}
-#book .btn::before{background:var(--rust)}
-#book .btn:hover{box-shadow:0 14px 30px -14px rgba(21,18,13,.7)}
-#book .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(21,18,13,.3)}
-#book .btn.ghost:hover{color:var(--paper)}
+.hint{color:var(--bk-hint);font-size:.9rem;margin:10px 0 0}
+.err{color:var(--bk-err);font-size:.92rem;min-height:1.3em;margin:4px 0 14px;font-weight:500}
+#book .btn{--bg:var(--bk-ink);color:var(--bk-bg)}
+#book .btn::before{background:var(--bk-accent)}
+#book .btn:hover{box-shadow:0 14px 30px -14px rgba(var(--bk-rgb),.7)}
+#book .btn.ghost{background:transparent;color:var(--bk-ink);box-shadow:inset 0 0 0 1px rgba(var(--bk-rgb),.3)}
+#book .btn.ghost:hover{color:var(--bk-bg)}
 #submit{width:100%;justify-content:center;padding:18px 24px;font-size:1.05rem}
 #done{display:none;text-align:center;padding:24px 0;animation:pop .5s ease}
 #done .check{width:84px;height:84px;margin:0 auto 20px;display:block}
-#done .check circle{stroke-dasharray:240;stroke-dashoffset:240;animation:draw .8s .1s ease forwards}
-#done .check path{stroke-dasharray:60;stroke-dashoffset:60;animation:draw .5s .7s ease forwards}
+#done .check circle{stroke:var(--bk-accent);stroke-dasharray:240;stroke-dashoffset:240;animation:draw .8s .1s ease forwards}
+#done .check path{stroke:var(--bk-ink);stroke-dasharray:60;stroke-dashoffset:60;animation:draw .5s .7s ease forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
 #done h3{font-size:clamp(2rem,4vw,3rem);font-weight:300}
 #doneMsg{font-size:1.1rem;max-width:30em;margin:0 auto 18px}
@@ -157,7 +179,7 @@ textarea{resize:vertical}
 .svc{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .svc li{display:grid;grid-template-columns:60px 1fr;gap:8px 24px;padding:32px 0;border-bottom:1px solid var(--line);position:relative;transition:padding .4s cubic-bezier(.2,.7,.2,1)}
 @media (min-width:860px){.svc li{grid-template-columns:200px 1.1fr 1fr;align-items:center}}
-.svc li::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(238,168,74,.09),transparent 70%);opacity:0;transition:opacity .4s;pointer-events:none}
+.svc li::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--glow-soft),transparent 70%);opacity:0;transition:opacity .4s;pointer-events:none}
 .svc li:hover::before{opacity:1}
 .svc li:hover{padding-left:16px}
 .svc .n{font:500 .78rem var(--mono);color:var(--amber);letter-spacing:.14em}
@@ -179,7 +201,7 @@ td:first-child{font-family:var(--serif);font-size:1.15rem}
 td:last-child{text-align:right;font:500 .9rem/1.7 var(--mono);color:var(--paper-dim)}
 tr.off td{color:var(--muted)}
 tr.off td:first-child{font-style:italic}
-tr.today td:first-child::after{content:"Today";font:500 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;background:var(--amber);color:var(--ink);padding:3px 8px;border-radius:99px;margin-left:10px;vertical-align:middle}
+tr.today td:first-child::after{content:"Today";font:500 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;background:var(--amber);color:var(--on-accent);padding:3px 8px;border-radius:99px;margin-left:10px;vertical-align:middle}
 .contact a{color:var(--paper);text-decoration:none;font-family:var(--serif);font-size:clamp(1.6rem,2.8vw,2.2rem);display:block;line-height:1.25;transition:color .2s}
 .contact a:hover{color:var(--amber)}
 .contact address{font-style:normal;color:var(--paper-dim);margin:22px 0 0;padding-top:22px;border-top:1px solid var(--line)}
@@ -188,6 +210,41 @@ tr.today td:first-child::after{content:"Today";font:500 .62rem var(--mono);lette
 footer{padding:40px 0 48px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}
 footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:baseline}
 footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-height:.9;color:var(--paper);opacity:.08;letter-spacing:-.04em;width:100%;margin-bottom:24px;font-weight:300;user-select:none}
+
+/* mobile spacing */
+@media (max-width:640px){
+ body{font-size:16px}
+ section{padding:56px 0}
+ .sec-head{gap:10px;margin-bottom:28px}
+ .hero{padding:32px 0 44px}
+ .hero .wrap{gap:36px}
+ .eyebrow{margin-bottom:18px}
+ .hero p.lede{margin-bottom:24px}
+ .hero .row .btn{flex:1 1 100%;justify-content:center}
+ .facts{gap:18px 28px;margin-top:32px;padding-top:20px}
+ .facts b{font-size:1.6rem}
+ .lens{width:min(84%,340px)}
+ .lens .tag{right:0;bottom:6%;padding:8px 12px}
+ .chart{padding:14px 0}
+ .chart span s{font-size:2.2rem}
+ .chart span u{font-size:1.5rem}
+ .svc li{grid-template-columns:40px 1fr;gap:4px 14px;padding:22px 0}
+ .svc li:hover{padding-left:0}
+ .svc p{font-size:.95rem}
+ #book{border-radius:24px 24px 0 0}
+ .book-grid{gap:28px}
+ .steps li{padding:14px 0;grid-template-columns:36px 1fr}
+ .card{padding:20px 16px;border-radius:22px}
+ .field{margin-bottom:18px}
+ .slots{grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}
+ .panel{padding:22px 18px;border-radius:22px}
+ td{padding:12px 0}
+ td:first-child{font-size:1.05rem}
+ td:last-child{font-size:.84rem}
+ .contact address{margin-top:16px;padding-top:16px}
+ footer{padding:28px 0 36px}
+ footer .big{margin-bottom:14px}
+}
 
 /* reveal */
 .rv{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
@@ -200,7 +257,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 </head>
 <body>
 <header><div class="wrap">
-<a class="logo" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M2 16Q16 2 30 16Q16 30 2 16Z" fill="none" stroke="#eea84a" stroke-width="1.6"/><circle cx="16" cy="16" r="5.5" fill="#eea84a"/><circle cx="16" cy="16" r="2.2" fill="#15120d"/></svg>H Evans <i>Optometrist</i></a>
+<a class="logo" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M2 16Q16 2 30 16Q16 30 2 16Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="16" r="5.5" fill="currentColor"/><circle cx="16" cy="16" r="2.2" style="fill:var(--ink)"/></svg>H Evans <i>Optometrist</i></a>
 <nav><a class="link" href="#services">Services</a><a class="link" href="#hours">Hours &amp; contact</a><a class="btn sm" href="#book">Book a visit <span class="arr">→</span></a></nav>
 </div></header>
 
@@ -209,7 +266,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <div>
 <p class="eyebrow mono load">Eldorado Park · Optician &amp; contact lens practitioner</p>
 <h1 class="load d1">See every <em>letter</em> on the chart, <span class="blur">clearly.</span></h1>
-<p class="lede load d2">Comprehensive eye examinations, contact lens fittings and friendly, careful service from H Evans. Book online in under a minute.</p>
+<p class="lede load d2">Comprehensive eye examinations, contact lens fittings and careful service from H Evans Optometrist. Book online in under a minute.</p>
 <div class="row load d3"><a class="btn" href="#book">Book an appointment <span class="arr">→</span></a><a class="btn ghost" href="#hours">Hours &amp; contact</a></div>
 <div class="facts load d4">
 <div><b>6/6</b><span>the vision we aim for</span></div>
@@ -218,7 +275,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 </div>
 </div>
 <div class="lens load d3" id="lens" aria-hidden="true">
-<svg class="ring" viewBox="0 0 400 400"><defs><path id="circ" d="M200 200m-186 0a186 186 0 1 1 372 0a186 186 0 1 1-372 0"/></defs><text><textPath href="#circ">Book an eye test · Contact lenses · Glasses · Children’s eyecare · </textPath></text></svg>
+<svg class="ring" viewBox="0 0 400 400"><defs><path id="circ" d="M200 200m-186 0a186 186 0 1 1 372 0a186 186 0 1 1-372 0"/></defs><text><textPath href="#circ">Book an eye test · Contact lenses · Spectacles · Children’s eyecare · </textPath></text></svg>
 <div class="ball"><div class="iris" id="iris"></div></div>
 <div class="lid"></div>
 <div class="tag"><b>Eye test?</b>Book in under a minute</div>
@@ -226,17 +283,18 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 </div></div>
 
 <div class="chart" aria-hidden="true"><div class="track">
-<span><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>eye examinations</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>contact lenses</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>glasses &amp; frames</u></span>
-<span><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>eye examinations</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>contact lenses</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>glasses &amp; frames</u></span>
+<span><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>eye examinations</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>contact lenses</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>spectacles &amp; frames</u></span>
+<span><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>eye examinations</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>contact lenses</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>spectacles &amp; frames</u></span>
 </div></div>
 
 <section id="services"><div class="wrap">
 <div class="sec-head rv"><span class="num">01 — Services</span><h2>Everything your eyes <em>need</em>, under one roof.</h2></div>
 <ul class="svc">
 <li class="rv"><span class="n">01</span><h3>Eye examinations</h3><p>Full vision and eye-health checks for all ages, including glaucoma and retinal screening.</p></li>
-<li class="rv"><span class="n">02</span><h3>Contact lenses</h3><p>Fittings, trial lenses and aftercare for daily, monthly and specialty lenses.</p></li>
-<li class="rv"><span class="n">03</span><h3>Glasses</h3><p>Frames and lenses to suit your prescription, lifestyle and budget, with expert fitting.</p></li>
-<li class="rv"><span class="n">04</span><h3>Children’s eyecare</h3><p>Gentle, patient testing to catch problems early and support learning.</p></li>
+<li class="rv"><span class="n">02</span><h3>Free driver’s licence screening</h3><p>A free vision screening for your driver’s licence application or renewal.</p></li>
+<li class="rv"><span class="n">03</span><h3>Contact lenses</h3><p>Fittings, trial lenses and aftercare for daily and monthly lenses.</p></li>
+<li class="rv"><span class="n">04</span><h3>Spectacles</h3><p>Frames and lenses to suit your prescription, lifestyle and budget, with expert fitting.</p></li>
+<li class="rv"><span class="n">05</span><h3>Children’s eyecare</h3><p>Gentle, patient testing to catch problems early and support learning.</p></li>
 </ul>
 </div></section>
 
@@ -244,7 +302,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <div class="sec-head rv"><span class="num">02 — Booking</span><h2>Book your <em>appointment</em>.</h2></div>
 <div class="book-grid">
 <ol class="steps rv">
-<li><b>01</b><div><strong>Pick a service</strong><span>Eye test, lenses, glasses or a follow-up.</span></div></li>
+<li><b>01</b><div><strong>Pick a service</strong><span>Eye test, licence screening, lenses, spectacles or a follow-up.</span></div></li>
 <li><b>02</b><div><strong>Choose a time</strong><span>Live slots based on our consulting hours.</span></div></li>
 <li><b>03</b><div><strong>We confirm</strong><span>By phone or WhatsApp, usually the same day.</span></div></li>
 <li class="note">No consulting on Fridays, Sundays or public holidays.</li>
@@ -254,10 +312,11 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <div class="grid2">
 <div class="field"><label for="service">Service</label>
 <select id="service">
-<option>Comprehensive eye test</option>
+<option>Eye test</option>
+<option>Free driver’s licence screening</option>
 <option>Contact lens consultation</option>
 <option>Child’s eye test</option>
-<option>Glasses collection / adjustment</option>
+<option>Spectacles collection / adjustment</option>
 <option>Eye concern / follow-up</option>
 </select></div>
 <div class="field"><label for="date">Date</label><input type="date" id="date"></div>
@@ -275,7 +334,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <button class="btn" id="submit" type="button">Request appointment</button>
 </div>
 <div id="done">
-<svg class="check" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="38" fill="none" stroke="#c8643b" stroke-width="2"/><path d="M26 43l11 11 21-23" fill="none" stroke="#15120d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg class="check" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="38" fill="none" stroke-width="2"/><path d="M26 43l11 11 21-23" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <h3 id="doneTitle">Request sent!</h3>
 <p id="doneMsg"></p>
 <div id="fallback" style="display:none">
@@ -301,7 +360,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <a href="tel:+27659288938">065 928 8938</a>
 <a href="tel:+27815232098">081 523 2098</a>
 <address>2697 Kiepersol Street, Extension 3<br>Eldorado Park</address>
-<p class="bring">Please bring your current glasses, contact lenses and medical aid card.</p></div>
+<p class="bring">Please bring your current spectacles, contact lenses and medical aid card.</p></div>
 </div>
 </div></section>
 </main>
