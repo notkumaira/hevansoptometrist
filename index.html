@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>H Evans Optometrist | Book an Eye Test</title>
+<meta name="theme-color" content="#15120d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..700&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+ --ink:#15120d;--ink-2:#1e1a13;--ink-3:#2a241a;
+ --paper:#f2e9d8;--paper-dim:#bfb39b;--muted:#8f8470;
+ --amber:#eea84a;--amber-d:#d98d2b;--rust:#c8643b;
+ --line:rgba(242,233,216,.13);--line-2:rgba(242,233,216,.24);
+ --serif:"Fraunces",Georgia,serif;--sans:"Bricolage Grotesque",ui-sans-serif,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+ color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--paper);font:17px/1.6 var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.07;mix-blend-mode:overlay;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.02;margin:0 0 .5em;letter-spacing:-.02em;font-variation-settings:"opsz" 144}
+em{font-style:italic;color:var(--amber)}
+a{color:var(--amber)}
+::selection{background:var(--amber);color:var(--ink)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+.mono{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* header */
+header{position:sticky;top:0;z-index:40;background:rgba(21,18,13,.72);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--paper);font-family:var(--serif);font-size:1.25rem;letter-spacing:-.01em}
+.logo i{font-style:italic;color:var(--amber)}
+.logo svg{width:30px;height:30px}
+nav{display:flex;align-items:center;gap:28px}
+nav a.link{color:var(--paper-dim);text-decoration:none;font-size:.92rem;position:relative}
+nav a.link::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1px;background:var(--amber);transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+nav a.link:hover{color:var(--paper)}
+nav a.link:hover::after{transform:scaleX(1);transform-origin:left}
+@media (max-width:720px){nav a.link{display:none}}
+
+/* buttons */
+.btn{--bg:var(--amber);display:inline-flex;align-items:center;gap:10px;background:var(--bg);color:var(--ink);border:0;border-radius:999px;padding:14px 24px;font:600 .98rem var(--sans);text-decoration:none;cursor:pointer;position:relative;overflow:hidden;isolation:isolate;transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s}
+.btn::before{content:"";position:absolute;inset:0;background:var(--paper);transform:translateY(101%);transition:transform .4s cubic-bezier(.2,.7,.2,1);z-index:-1;border-radius:inherit}
+.btn:hover::before{transform:translateY(0)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px rgba(238,168,74,.55)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn:focus-visible{outline:2px solid var(--paper);outline-offset:3px}
+.btn .arr{transition:transform .3s}
+.btn:hover .arr{transform:translateX(4px)}
+.btn.sm{padding:10px 18px;font-size:.88rem}
+.btn.ghost{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px var(--line-2)}
+.btn.ghost:hover{color:var(--ink)}
+.btn[disabled]{opacity:.6;cursor:progress}
+
+/* hero */
+.hero{position:relative;padding:clamp(48px,8vw,110px) 0 clamp(56px,8vw,96px);overflow:hidden}
+.hero::after{content:"";position:absolute;width:900px;height:900px;right:-300px;top:-260px;border-radius:50%;background:radial-gradient(circle,rgba(238,168,74,.16),rgba(200,100,59,.06) 40%,transparent 68%);pointer-events:none;z-index:-1}
+.hero .wrap{display:grid;grid-template-columns:1fr;gap:56px;align-items:center}
+@media (min-width:920px){.hero .wrap{grid-template-columns:1.25fr 1fr}}
+.eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.eyebrow::before{content:"";width:36px;height:1px;background:var(--amber)}
+.hero h1{font-size:clamp(3rem,8.4vw,7.4rem);font-weight:300;margin-bottom:.35em}
+.hero h1 .blur{display:inline-block;filter:blur(7px);opacity:.55;animation:focus 2.6s 1s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes focus{to{filter:blur(0);opacity:1}}
+.hero p.lede{color:var(--paper-dim);font-size:clamp(1.05rem,1.4vw,1.2rem);max-width:30em;margin:0 0 32px}
+.hero .row{display:flex;gap:12px;flex-wrap:wrap}
+.facts{display:flex;gap:36px;margin-top:48px;padding-top:24px;border-top:1px solid var(--line);flex-wrap:wrap}
+.facts b{display:block;font-family:var(--serif);font-weight:400;font-size:2rem;line-height:1;color:var(--paper)}
+.facts span{font-size:.85rem;color:var(--muted)}
+
+/* iris */
+.lens{position:relative;width:min(100%,460px);aspect-ratio:1;justify-self:center}
+.lens .ring{position:absolute;inset:0;animation:spin 38s linear infinite}
+.lens .ring text{font:500 10.5px var(--mono);letter-spacing:4.2px;fill:var(--paper-dim);text-transform:uppercase}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lens .ball{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#2e271c,#15120d 70%);box-shadow:inset 0 0 0 1px var(--line-2),0 40px 80px -30px rgba(0,0,0,.8),0 0 0 14px rgba(242,233,216,.025),0 0 0 15px var(--line);overflow:hidden}
+.lens .iris{position:absolute;left:50%;top:50%;width:62%;aspect-ratio:1;margin:-31% 0 0 -31%;border-radius:50%;transition:transform .25s ease-out;
+ background:
+ radial-gradient(circle,var(--ink) 0 27%,transparent 28%),
+ repeating-conic-gradient(from 0deg,rgba(21,18,13,.5) 0 2deg,transparent 2deg 7deg),
+ radial-gradient(circle,#f6c372 28%,var(--amber) 42%,var(--rust) 62%,#5a2c17 78%,#20160d 80%);
+ box-shadow:0 0 60px rgba(238,168,74,.25)}
+.lens .iris::after{content:"";position:absolute;width:15%;height:15%;left:56%;top:24%;border-radius:50%;background:rgba(255,248,232,.9);filter:blur(.5px)}
+.lens .lid{position:absolute;inset:12%;border-radius:50%;pointer-events:none;background:linear-gradient(var(--ink),var(--ink)) top/100% 0 no-repeat,linear-gradient(var(--ink),var(--ink)) bottom/100% 0 no-repeat;animation:blink 7s 3s infinite}
+@keyframes blink{0%,94%,100%{background-size:100% 0,100% 0}97%{background-size:100% 51%,100% 51%}}
+.lens .tag{position:absolute;right:-4%;bottom:10%;background:var(--paper);color:var(--ink);padding:10px 14px;border-radius:14px;font-size:.82rem;line-height:1.3;transform:rotate(-4deg);box-shadow:0 18px 40px -16px rgba(0,0,0,.7)}
+.lens .tag b{font-family:var(--serif);font-weight:500;font-size:1.05rem;display:block}
+
+/* snellen marquee */
+.chart{border-block:1px solid var(--line);overflow:hidden;padding:22px 0;background:var(--ink-2)}
+.chart .track{display:flex;width:max-content;animation:slide 40s linear infinite}
+.chart span{font-family:var(--serif);font-weight:600;white-space:nowrap;padding-right:48px;display:flex;align-items:baseline;gap:48px;color:var(--paper)}
+.chart span s{text-decoration:none;font-size:3rem;letter-spacing:.08em}
+.chart span s:nth-child(2){font-size:2.2rem;opacity:.8}
+.chart span s:nth-child(3){font-size:1.5rem;opacity:.6}
+.chart span s:nth-child(4){font-size:1rem;opacity:.45;filter:blur(.6px)}
+.chart span u{text-decoration:none;font:italic 300 2rem var(--serif);color:var(--amber)}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+section{padding:clamp(72px,10vw,128px) 0;position:relative}
+.sec-head{display:grid;gap:20px;margin-bottom:56px}
+@media (min-width:860px){.sec-head{grid-template-columns:200px 1fr;align-items:end}}
+.sec-head h2{font-size:clamp(2.4rem,5.4vw,4.4rem);margin:0;font-weight:300}
+.sec-head .num{font-family:var(--mono);font-size:.78rem;color:var(--amber);letter-spacing:.14em}
+
+/* booking */
+#book{background:var(--paper);color:var(--ink);border-radius:clamp(24px,4vw,48px) clamp(24px,4vw,48px) 0 0}
+#book em{color:var(--rust)}
+#book .sec-head .num{color:var(--rust)}
+.book-grid{display:grid;gap:40px}
+@media (min-width:920px){.book-grid{grid-template-columns:320px 1fr;gap:64px}}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;align-self:start;position:sticky;top:100px}
+.steps li{display:grid;grid-template-columns:44px 1fr;padding:18px 0;border-top:1px solid rgba(21,18,13,.14)}
+.steps li:last-child{border-bottom:1px solid rgba(21,18,13,.14)}
+.steps li b{font:500 .78rem var(--mono);color:var(--rust);padding-top:4px}
+.steps li strong{display:block;font-family:var(--serif);font-weight:500;font-size:1.2rem}
+.steps li span{color:#6b604d;font-size:.92rem}
+.steps .note{margin-top:20px;font-size:.88rem;color:#6b604d;border:0;display:block;padding:0}
+@media (max-width:919px){.steps{position:static}}
+.card{background:#fbf6ec;border:1px solid rgba(21,18,13,.1);border-radius:28px;padding:clamp(22px,3.4vw,44px);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 40px 80px -50px rgba(60,40,10,.45)}
+.grid2{display:grid;gap:0 20px;grid-template-columns:1fr}
+@media (min-width:640px){.grid2{grid-template-columns:1fr 1fr}}
+.field{margin-bottom:22px}
+label{display:block;font:500 .7rem var(--mono);letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px;color:#6b604d}
+input,select,textarea{width:100%;padding:14px 16px;border:1px solid rgba(21,18,13,.18);border-radius:14px;background:var(--paper);color:var(--ink);font:inherit;font-size:1rem;transition:border-color .2s,box-shadow .2s,background .2s;color-scheme:light}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2315120d' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
+input:hover,select:hover,textarea:hover{border-color:rgba(21,18,13,.35)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--rust);box-shadow:0 0 0 4px rgba(200,100,59,.16);background:#fff}
+textarea{resize:vertical}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px}
+.slot{padding:12px 0;border:1px solid rgba(21,18,13,.16);background:var(--paper);color:var(--ink);border-radius:12px;font:500 .88rem var(--mono);cursor:pointer;transition:transform .2s,background .2s,border-color .2s,color .2s;opacity:0;animation:pop .4s cubic-bezier(.2,.7,.2,1) forwards}
+.slot:hover{border-color:var(--ink);transform:translateY(-2px)}
+.slot:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+.slot[aria-pressed="true"]{background:var(--ink);color:var(--amber);border-color:var(--ink);transform:translateY(-2px);box-shadow:0 10px 20px -10px rgba(21,18,13,.6)}
+@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+.hint{color:#7a6f5b;font-size:.9rem;margin:10px 0 0}
+.err{color:#a8321a;font-size:.92rem;min-height:1.3em;margin:4px 0 14px;font-weight:500}
+#book .btn{--bg:var(--ink);color:var(--paper)}
+#book .btn::before{background:var(--rust)}
+#book .btn:hover{box-shadow:0 14px 30px -14px rgba(21,18,13,.7)}
+#book .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(21,18,13,.3)}
+#book .btn.ghost:hover{color:var(--paper)}
+#submit{width:100%;justify-content:center;padding:18px 24px;font-size:1.05rem}
+#done{display:none;text-align:center;padding:24px 0;animation:pop .5s ease}
+#done .check{width:84px;height:84px;margin:0 auto 20px;display:block}
+#done .check circle{stroke-dasharray:240;stroke-dashoffset:240;animation:draw .8s .1s ease forwards}
+#done .check path{stroke-dasharray:60;stroke-dashoffset:60;animation:draw .5s .7s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+#done h3{font-size:clamp(2rem,4vw,3rem);font-weight:300}
+#doneMsg{font-size:1.1rem;max-width:30em;margin:0 auto 18px}
+
+/* services */
+.svc{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.svc li{display:grid;grid-template-columns:60px 1fr;gap:8px 24px;padding:32px 0;border-bottom:1px solid var(--line);position:relative;transition:padding .4s cubic-bezier(.2,.7,.2,1)}
+@media (min-width:860px){.svc li{grid-template-columns:200px 1.1fr 1fr;align-items:center}}
+.svc li::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(238,168,74,.09),transparent 70%);opacity:0;transition:opacity .4s;pointer-events:none}
+.svc li:hover::before{opacity:1}
+.svc li:hover{padding-left:16px}
+.svc .n{font:500 .78rem var(--mono);color:var(--amber);letter-spacing:.14em}
+.svc h3{font-size:clamp(1.8rem,3.6vw,3rem);margin:0;font-weight:300;transition:font-style .3s}
+.svc li:hover h3{font-style:italic;color:var(--amber)}
+.svc p{margin:0;color:var(--paper-dim);grid-column:2}
+@media (min-width:860px){.svc p{grid-column:auto}}
+
+/* hours */
+#hours{background:var(--ink-2);border-top:1px solid var(--line)}
+.split{display:grid;gap:24px}
+@media (min-width:860px){.split{grid-template-columns:1.2fr 1fr}}
+.panel{border:1px solid var(--line);border-radius:28px;padding:clamp(24px,3.4vw,44px);background:linear-gradient(160deg,var(--ink-3),var(--ink-2))}
+.panel h2{font-size:clamp(1.8rem,3vw,2.4rem);font-weight:300}
+table{width:100%;border-collapse:collapse}
+td{padding:16px 0;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td:first-child{font-family:var(--serif);font-size:1.15rem}
+td:last-child{text-align:right;font:500 .9rem/1.7 var(--mono);color:var(--paper-dim)}
+tr.off td{color:var(--muted)}
+tr.off td:first-child{font-style:italic}
+tr.today td:first-child::after{content:"Today";font:500 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;background:var(--amber);color:var(--ink);padding:3px 8px;border-radius:99px;margin-left:10px;vertical-align:middle}
+.contact a{color:var(--paper);text-decoration:none;font-family:var(--serif);font-size:clamp(1.6rem,2.8vw,2.2rem);display:block;line-height:1.25;transition:color .2s}
+.contact a:hover{color:var(--amber)}
+.contact address{font-style:normal;color:var(--paper-dim);margin:22px 0 0;padding-top:22px;border-top:1px solid var(--line)}
+.contact .bring{margin-top:22px;font-size:.9rem;color:var(--muted)}
+
+footer{padding:40px 0 48px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:baseline}
+footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-height:.9;color:var(--paper);opacity:.08;letter-spacing:-.04em;width:100%;margin-bottom:24px;font-weight:300;user-select:none}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.load{opacity:0;transform:translateY(20px);animation:up .9s cubic-bezier(.2,.7,.2,1) forwards}
+.d1{animation-delay:.1s}.d2{animation-delay:.22s}.d3{animation-delay:.36s}.d4{animation-delay:.5s}.d5{animation-delay:.64s}
+@keyframes up{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.rv,.load{opacity:1;transform:none}.hero h1 .blur{filter:none;opacity:1}.lens .lid{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<a class="logo" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M2 16Q16 2 30 16Q16 30 2 16Z" fill="none" stroke="#eea84a" stroke-width="1.6"/><circle cx="16" cy="16" r="5.5" fill="#eea84a"/><circle cx="16" cy="16" r="2.2" fill="#15120d"/></svg>H Evans <i>Optometrist</i></a>
+<nav><a class="link" href="#services">Services</a><a class="link" href="#hours">Hours &amp; contact</a><a class="btn sm" href="#book">Book a visit <span class="arr">→</span></a></nav>
+</div></header>
+
+<main id="top">
+<div class="hero"><div class="wrap">
+<div>
+<p class="eyebrow mono load">Eldorado Park · Optician &amp; contact lens practitioner</p>
+<h1 class="load d1">See every <em>letter</em> on the chart, <span class="blur">clearly.</span></h1>
+<p class="lede load d2">Comprehensive eye examinations, contact lens fittings and friendly, careful service from H Evans. Book online in under a minute.</p>
+<div class="row load d3"><a class="btn" href="#book">Book an appointment <span class="arr">→</span></a><a class="btn ghost" href="#hours">Hours &amp; contact</a></div>
+<div class="facts load d4">
+<div><b>6/6</b><span>the vision we aim for</span></div>
+<div><b>~1 min</b><span>to book online</span></div>
+<div><b>5 days</b><span>a week, Mon–Thu &amp; Sat</span></div>
+</div>
+</div>
+<div class="lens load d3" id="lens" aria-hidden="true">
+<svg class="ring" viewBox="0 0 400 400"><defs><path id="circ" d="M200 200m-186 0a186 186 0 1 1 372 0a186 186 0 1 1-372 0"/></defs><text><textPath href="#circ">Book an eye test · Contact lenses · Glasses · Children’s eyecare · </textPath></text></svg>
+<div class="ball"><div class="iris" id="iris"></div></div>
+<div class="lid"></div>
+<div class="tag"><b>Eye test?</b>Book in under a minute</div>
+</div>
+</div></div>
+
+<div class="chart" aria-hidden="true"><div class="track">
+<span><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>eye examinations</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>contact lenses</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>glasses &amp; frames</u></span>
+<span><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>eye examinations</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>contact lenses</u><s>E</s><s>F P</s><s>T O Z</s><s>L P E D</s><u>glasses &amp; frames</u></span>
+</div></div>
+
+<section id="services"><div class="wrap">
+<div class="sec-head rv"><span class="num">01 — Services</span><h2>Everything your eyes <em>need</em>, under one roof.</h2></div>
+<ul class="svc">
+<li class="rv"><span class="n">01</span><h3>Eye examinations</h3><p>Full vision and eye-health checks for all ages, including glaucoma and retinal screening.</p></li>
+<li class="rv"><span class="n">02</span><h3>Contact lenses</h3><p>Fittings, trial lenses and aftercare for daily, monthly and specialty lenses.</p></li>
+<li class="rv"><span class="n">03</span><h3>Glasses</h3><p>Frames and lenses to suit your prescription, lifestyle and budget, with expert fitting.</p></li>
+<li class="rv"><span class="n">04</span><h3>Children’s eyecare</h3><p>Gentle, patient testing to catch problems early and support learning.</p></li>
+</ul>
+</div></section>
+
+<section id="book"><div class="wrap">
+<div class="sec-head rv"><span class="num">02 — Booking</span><h2>Book your <em>appointment</em>.</h2></div>
+<div class="book-grid">
+<ol class="steps rv">
+<li><b>01</b><div><strong>Pick a service</strong><span>Eye test, lenses, glasses or a follow-up.</span></div></li>
+<li><b>02</b><div><strong>Choose a time</strong><span>Live slots based on our consulting hours.</span></div></li>
+<li><b>03</b><div><strong>We confirm</strong><span>By phone or WhatsApp, usually the same day.</span></div></li>
+<li class="note">No consulting on Fridays, Sundays or public holidays.</li>
+</ol>
+<div class="card rv">
+<div id="formArea">
+<div class="grid2">
+<div class="field"><label for="service">Service</label>
+<select id="service">
+<option>Comprehensive eye test</option>
+<option>Contact lens consultation</option>
+<option>Child’s eye test</option>
+<option>Glasses collection / adjustment</option>
+<option>Eye concern / follow-up</option>
+</select></div>
+<div class="field"><label for="date">Date</label><input type="date" id="date"></div>
+</div>
+<div class="field"><label>Available times</label>
+<div class="slots" id="slots" role="group" aria-label="Available times"></div>
+<p class="hint" id="slotHint">Pick a date to see available times.</p></div>
+<div class="grid2">
+<div class="field"><label for="name">Full name</label><input id="name" autocomplete="name"></div>
+<div class="field"><label for="phone">Phone</label><input id="phone" type="tel" autocomplete="tel"></div>
+</div>
+<div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email"></div>
+<div class="field"><label for="notes">Anything we should know? (optional)</label><textarea id="notes" rows="3" placeholder="e.g. headaches, new to contact lenses, medical aid details"></textarea></div>
+<div class="err" id="err" role="alert"></div>
+<button class="btn" id="submit" type="button">Request appointment</button>
+</div>
+<div id="done">
+<svg class="check" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="38" fill="none" stroke="#c8643b" stroke-width="2"/><path d="M26 43l11 11 21-23" fill="none" stroke="#15120d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<h3 id="doneTitle">Request sent!</h3>
+<p id="doneMsg"></p>
+<div id="fallback" style="display:none">
+<p class="hint">We couldn’t notify the practice automatically. Please tap the button below to send your request on WhatsApp.</p>
+<p><a class="btn" id="mailLink" href="#" target="_blank" rel="noopener">Send on WhatsApp</a></p>
+</div>
+<p><button class="btn ghost" id="again" type="button">Make another booking</button></p>
+</div>
+</div>
+</div>
+</div></section>
+
+<section id="hours"><div class="wrap">
+<div class="sec-head rv"><span class="num">03 — Visit us</span><h2>Hours &amp; <em>contact</em>.</h2></div>
+<div class="split">
+<div class="panel rv"><p class="mono" style="margin-top:0">Opening hours</p>
+<table id="hoursTable">
+<tr data-days="1,2,3,4"><td>Monday – Thursday</td><td>10:00 – 12:00<br>14:00 – 17:00</td></tr>
+<tr data-days="6"><td>Saturday</td><td>10:00 – 12:00</td></tr>
+<tr class="off" data-days="0,5"><td>Friday, Sunday &amp; public holidays</td><td>No consulting</td></tr>
+</table></div>
+<div class="panel contact rv"><p class="mono" style="margin-top:0">Get in touch</p>
+<a href="tel:+27659288938">065 928 8938</a>
+<a href="tel:+27815232098">081 523 2098</a>
+<address>2697 Kiepersol Street, Extension 3<br>Eldorado Park</address>
+<p class="bring">Please bring your current glasses, contact lenses and medical aid card.</p></div>
+</div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+<div class="big" aria-hidden="true">H Evans</div>
+<span>© <span id="yr">2026</span> H Evans Optometrist. All rights reserved.</span>
+<span class="mono">Eldorado Park · Johannesburg</span>
+</div></footer>
+
+<script>
+(function(){
+var WA="27659288938"; // WhatsApp number that receives booking requests
+var $=function(i){return document.getElementById(i)};
+var dateEl=$("date"),slotsEl=$("slots"),hint=$("slotHint"),chosen=null;
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+var today=new Date();dateEl.min=iso(today);
+var max=new Date();max.setMonth(max.getMonth()+6);dateEl.max=iso(max);
+$("yr").textContent=today.getFullYear();
+function times(day){ // 0 Sun ... 6 Sat
+ var out=[],ranges;
+ if(day>=1&&day<=4)ranges=[[10,12],[14,17]];else if(day===6)ranges=[[10,12]];else return [];
+ ranges.forEach(function(r){for(var h=r[0];h<r[1];h++){var s=String(h).padStart(2,"0");out.push(s+":00");out.push(s+":30")}});
+ return out;
+}
+function render(){
+ chosen=null;slotsEl.innerHTML="";
+ if(!dateEl.value){hint.textContent="Pick a date to see available times.";return}
+ var p=dateEl.value.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);
+ var list=times(d.getDay());
+ var now=new Date();
+ if(iso(d)===iso(now)){var cur=now.getHours()*60+now.getMinutes()+60;list=list.filter(function(t){var q=t.split(":");return (+q[0])*60+(+q[1])>=cur})}
+ if(!list.length){hint.textContent="No appointments available on this day. Please choose another date.";return}
+ hint.textContent="Select a time:";
+ list.forEach(function(t){
+  var b=document.createElement("button");b.type="button";b.className="slot";b.textContent=t;b.setAttribute("aria-pressed","false");
+  b.onclick=function(){chosen=t;[].forEach.call(slotsEl.children,function(c){c.setAttribute("aria-pressed",c===b?"true":"false")})};
+  slotsEl.appendChild(b);
+ });
+}
+dateEl.addEventListener("change",render);
+$("submit").onclick=function(){
+ var name=$("name").value.trim(),phone=$("phone").value.trim(),email=$("email").value.trim(),err=$("err");
+ if(!dateEl.value||!chosen){err.textContent="Please choose a date and time.";return}
+ if(!name){err.textContent="Please enter your name.";return}
+ if(!phone&&!email){err.textContent="Please add a phone number or email so we can confirm.";return}
+ if(email&&!/^\S+@\S+\.\S+$/.test(email)){err.textContent="That email address doesn’t look right.";return}
+ err.textContent="";
+ var p=dateEl.value.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);
+ var nice=d.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+ var svc=$("service").value;
+ var body="Appointment request\n\nService: "+svc+"\nDate: "+nice+"\nTime: "+chosen+"\nName: "+name+"\nPhone: "+phone+"\nEmail: "+email+"\nNotes: "+$("notes").value.trim();
+ var btn=$("submit");btn.disabled=true;btn.textContent="Sending…";
+ function finish(ok){
+  btn.disabled=false;btn.textContent="Request appointment";
+  $("mailLink").href="https://wa.me/"+WA+"?text="+encodeURIComponent(body);
+  $("doneTitle").textContent=ok?"Request sent!":"Almost done!";
+  $("doneMsg").textContent=svc+" on "+nice+" at "+chosen+". "+(ok?"We’ve received your request and will contact you to confirm.":"");
+  $("fallback").style.display=ok?"none":"block";
+  $("formArea").style.display="none";$("done").style.display="block";
+ }
+ fetch("/api/book",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service:svc,date:nice,time:chosen,name:name,phone:phone,email:email,notes:$("notes").value.trim()})})
+  .then(function(r){return r.ok?r.json():{}})
+  .then(function(j){finish(!!j.whatsappSent)})
+  .catch(function(){finish(false)});
+};
+$("again").onclick=function(){$("fallback").style.display="none";$("done").style.display="none";$("formArea").style.display="block";render()};
+})();
+</script>
+<script>
+(function(){
+// scroll reveal
+var els=document.querySelectorAll(".rv");
+if("IntersectionObserver" in window){
+ var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}})},{threshold:.12,rootMargin:"0px 0px -40px 0px"});
+ els.forEach(function(el){io.observe(el)});
+}else els.forEach(function(el){el.classList.add("in")});
+// highlight today's opening hours
+var day=new Date().getDay();
+document.querySelectorAll("#hoursTable tr").forEach(function(r){if(r.dataset.days.split(",").indexOf(String(day))>-1)r.classList.add("today")});
+// stagger time slots as they render
+var slots=document.getElementById("slots");
+new MutationObserver(function(){[].forEach.call(slots.children,function(c,i){c.style.animationDelay=(i*.025)+"s"})}).observe(slots,{childList:true});
+// iris follows the pointer
+var lens=document.getElementById("lens"),iris=document.getElementById("iris");
+if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+window.addEventListener("pointermove",function(e){
+ var r=lens.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+ var dx=e.clientX-cx,dy=e.clientY-cy,d=Math.hypot(dx,dy)||1,m=Math.min(d/6,r.width*.11);
+ iris.style.transform="translate("+(dx/d*m)+"px,"+(dy/d*m)+"px)";
+},{passive:true});
+})();
+</script>
+</body>
+</html>
