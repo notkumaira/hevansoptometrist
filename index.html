@@ -16,7 +16,7 @@
  --paper:#141f4a;--paper-dim:#454f7d;--muted:#6a7399;
  --amber:#34accb;--amber-d:#2889a3;--rust:#1d6a85;
  --line:rgba(20,31,74,.12);--line-2:rgba(20,31,74,.24);
- --on-accent:#ffffff;--hdr:rgba(255,255,255,.8);
+ --on-accent:#0b1b3a;--hdr:rgba(255,255,255,.8);
  --glow:rgba(52,172,203,.16);--glow-2:rgba(29,106,133,.05);--glow-soft:rgba(52,172,203,.08);--accent-shadow:rgba(52,172,203,.5);--iris-glow:rgba(52,172,203,.32);
  --ball-1:#e8f6fa;--ball-2:#c4e5ef;--ring:rgba(20,31,74,.03);--sh:rgba(20,31,74,.35);
  --pupil:#0a1033;--iris-lines:rgba(10,16,51,.4);--i1:#a9e3f2;--i4:#134a5f;--i5:#0a1033;--lid:#c4e5ef;
@@ -75,7 +75,7 @@ nav a.link:hover::after{transform:scaleX(1);transform-origin:left}
 .btn:hover .arr{transform:translateX(4px)}
 .btn.sm{padding:10px 18px;font-size:.88rem}
 .btn.ghost{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px var(--line-2)}
-.btn.ghost:hover{color:var(--on-accent)}
+.btn:hover,.btn.ghost:hover{color:var(--ink)}
 .btn[disabled]{opacity:.6;cursor:progress}
 
 /* hero */
@@ -141,7 +141,8 @@ section{padding:clamp(72px,10vw,128px) 0;position:relative}
 .steps li b{font:500 .78rem var(--mono);color:var(--bk-accent);padding-top:4px}
 .steps li strong{display:block;font-family:var(--serif);font-weight:500;font-size:1.2rem}
 .steps li span{color:var(--bk-sub);font-size:.92rem}
-.steps .note{margin-top:20px;font-size:.88rem;color:var(--bk-sub);border:0;display:block;padding:0}
+.steps li.note{display:block;margin-top:20px;padding:14px 16px;font-size:1rem;font-weight:700;line-height:1.4;color:var(--bk-ink);background:var(--bk-card);border:0;border-left:5px solid var(--bk-err);border-radius:10px}
+.steps li.note::before{content:"Please note";display:block;font:500 .68rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--bk-err);margin-bottom:4px}
 @media (max-width:919px){.steps{position:static}}
 .card{background:var(--bk-card);border:1px solid rgba(var(--bk-rgb),.1);border-radius:28px;padding:clamp(22px,3.4vw,44px);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 40px 80px -50px var(--bk-shadow)}
 .grid2{display:grid;gap:0 20px;grid-template-columns:1fr}
@@ -188,6 +189,31 @@ textarea{resize:vertical}
 .svc p{margin:0;color:var(--paper-dim);grid-column:2}
 @media (min-width:860px){.svc p{grid-column:auto}}
 
+/* reviews */
+[hidden]{display:none!important}
+.rev-sum[hidden]{display:none}
+.rev-sum{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:28px}
+.rev-sum b{font-family:var(--serif);font-size:3rem;font-weight:300;line-height:1}
+.stars{color:var(--amber);letter-spacing:.12em}
+.rgrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-bottom:44px}
+.rcard{border:1px solid var(--line);border-radius:20px;padding:22px;background:linear-gradient(160deg,var(--ink-3),var(--ink-2))}
+.rcard p{margin:10px 0 14px;color:var(--paper-dim)}
+.rcard .by{font-family:var(--serif);font-size:1.05rem}
+.rcard .when{color:var(--muted);font-size:.85rem}
+.rform{max-width:640px;border:1px solid var(--line);border-radius:24px;padding:clamp(20px,3vw,36px);background:var(--ink-2)}
+.rform h3{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:300}
+.rform label{color:var(--muted)}
+.rate{display:inline-flex;flex-direction:row-reverse;gap:4px}
+.rate input{position:absolute;opacity:0;width:1px;height:1px;padding:0;margin:0;border:0;pointer-events:none}
+.rate label{font:2.2rem/1 var(--sans);letter-spacing:0;text-transform:none;margin:0;cursor:pointer;color:var(--line-2);transition:color .15s,transform .15s}
+.rate label:hover{transform:scale(1.12)}
+.rate input:checked~label,.rate label:hover,.rate label:hover~label{color:var(--amber)}
+.rate input:focus-visible+label{outline:2px solid var(--amber);outline-offset:2px;border-radius:6px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.rmsg{min-height:1.4em;margin:12px 0 0;font-weight:600}
+.rmsg.bad{color:var(--rust)}
+@media (max-width:640px){.rev-sum b{font-size:2.4rem}.rcard{padding:18px}.rform{padding:20px 16px;border-radius:20px}}
+
 /* hours */
 #hours{background:var(--ink-2);border-top:1px solid var(--line)}
 .split{display:grid;gap:24px}
@@ -199,12 +225,16 @@ td{padding:16px 0;border-bottom:1px solid var(--line);vertical-align:top}
 tr:last-child td{border-bottom:0}
 td:first-child{font-family:var(--serif);font-size:1.15rem}
 td:last-child{text-align:right;font:500 .9rem/1.7 var(--mono);color:var(--paper-dim)}
-tr.off td{color:var(--muted)}
+tr.off td{color:var(--paper);font-weight:600}
+tr.off{background:var(--glow-soft)}
 tr.off td:first-child{font-style:italic}
 tr.today td:first-child::after{content:"Today";font:500 .62rem var(--mono);letter-spacing:.14em;text-transform:uppercase;background:var(--amber);color:var(--on-accent);padding:3px 8px;border-radius:99px;margin-left:10px;vertical-align:middle}
 .contact a{color:var(--paper);text-decoration:none;font-family:var(--serif);font-size:clamp(1.6rem,2.8vw,2.2rem);display:block;line-height:1.25;transition:color .2s}
 .contact a:hover{color:var(--amber)}
 .contact address{font-style:normal;color:var(--paper-dim);margin:22px 0 0;padding-top:22px;border-top:1px solid var(--line)}
+.walkin{margin:18px 0 0;padding:12px 16px;border-radius:14px;background:var(--glow-soft);box-shadow:inset 0 0 0 1px var(--line-2);font-weight:600;color:var(--paper)}
+.walkin::before{content:"✓";color:var(--amber);margin-right:10px;font-weight:700}
+.go{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
 .contact .bring{margin-top:22px;font-size:.9rem;color:var(--muted)}
 
 footer{padding:40px 0 48px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line)}
@@ -258,7 +288,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <body>
 <header><div class="wrap">
 <a class="logo" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M2 16Q16 2 30 16Q16 30 2 16Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="16" r="5.5" fill="currentColor"/><circle cx="16" cy="16" r="2.2" style="fill:var(--ink)"/></svg>H Evans <i>Optometrist</i></a>
-<nav><a class="link" href="#services">Services</a><a class="link" href="#hours">Hours &amp; contact</a><a class="btn sm" href="#book">Book a visit <span class="arr">→</span></a></nav>
+<nav><a class="link" href="#services">Services</a><a class="link" href="#hours">Hours &amp; contact</a><a class="link" href="#reviews">Reviews</a><a class="btn sm" href="#book">Book a visit <span class="arr">→</span></a></nav>
 </div></header>
 
 <main id="top">
@@ -266,7 +296,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <div>
 <p class="eyebrow mono load">Eldorado Park · Optician &amp; contact lens practitioner</p>
 <h1 class="load d1">See every <em>letter</em> on the chart, <span class="blur">clearly.</span></h1>
-<p class="lede load d2">Comprehensive eye examinations, contact lens fittings and careful service from H Evans Optometrist. Book online in under a minute.</p>
+<p class="lede load d2">Comprehensive eye examinations, contact lens fittings and careful service from H Evans Optometrist. Book online in under a minute. Walk-ins welcome during consulting hours.</p>
 <div class="row load d3"><a class="btn" href="#book">Book an appointment <span class="arr">→</span></a><a class="btn ghost" href="#hours">Hours &amp; contact</a></div>
 <div class="facts load d4">
 <div><b>6/6</b><span>the vision we aim for</span></div>
@@ -290,7 +320,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <section id="services"><div class="wrap">
 <div class="sec-head rv"><span class="num">01 — Services</span><h2>Everything your eyes <em>need</em>, under one roof.</h2></div>
 <ul class="svc">
-<li class="rv"><span class="n">01</span><h3>Eye examinations</h3><p>Full vision and eye-health checks for all ages, including glaucoma and retinal screening.</p></li>
+<li class="rv"><span class="n">01</span><h3>Eye examinations</h3><p>Full vision and eye-health checks for all ages, including cataract screening. Referrals to the relevant specialists are included when needed.</p></li>
 <li class="rv"><span class="n">02</span><h3>Free driver’s licence screening</h3><p>A free vision screening for your driver’s licence application or renewal.</p></li>
 <li class="rv"><span class="n">03</span><h3>Contact lenses</h3><p>Fittings, trial lenses and aftercare for daily and monthly lenses.</p></li>
 <li class="rv"><span class="n">04</span><h3>Spectacles</h3><p>Frames and lenses to suit your prescription, lifestyle and budget, with expert fitting.</p></li>
@@ -355,12 +385,36 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <tr data-days="1,2,3,4"><td>Monday – Thursday</td><td>10:00 – 12:00<br>14:00 – 17:00</td></tr>
 <tr data-days="6"><td>Saturday</td><td>10:00 – 12:00</td></tr>
 <tr class="off" data-days="0,5"><td>Friday, Sunday &amp; public holidays</td><td>No consulting</td></tr>
-</table></div>
+</table>
+<p class="walkin">Walk-ins welcome during consulting hours</p></div>
 <div class="panel contact rv"><p class="mono" style="margin-top:0">Get in touch</p>
 <a href="tel:+27659288938">065 928 8938</a>
 <a href="tel:+27815232098">081 523 2098</a>
 <address>2697 Kiepersol Street, Extension 3<br>Eldorado Park</address>
+<div class="go"><a class="btn sm" href="https://www.google.com/maps/dir/?api=1&destination=2697+Kiepersol+Street+Extension+3+Eldorado+Park+Johannesburg" target="_blank" rel="noopener">Get directions <span class="arr">→</span></a><a class="btn sm ghost" href="https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff%5Bnickname%5D=H+Evans+Optometrist&dropoff%5Bformatted_address%5D=2697+Kiepersol+Street+Extension+3+Eldorado+Park+Johannesburg" target="_blank" rel="noopener">Order an Uber</a><a class="btn sm ghost" href="https://www.google.com/maps/search/?api=1&query=H+Evans+Optometrist+2697+Kiepersol+Street+Extension+3+Eldorado+Park+Johannesburg" target="_blank" rel="noopener" title="Opens Google Maps in a new tab">★ Leave a Google review</a></div>
 <p class="bring">Please bring your current spectacles, contact lenses and medical aid card.</p></div>
+</div>
+</div></section>
+<section id="reviews"><div class="wrap">
+<div class="sec-head rv"><span class="num">04 — Reviews</span><h2>What patients <em>say</em>.</h2></div>
+<div class="rev-sum" id="revSum" hidden><b id="revAvg"></b><span class="stars" id="revStars" aria-hidden="true"></span><span class="mono" id="revCount"></span></div>
+<div class="rgrid" id="revList"></div>
+<div class="rform rv">
+<h3>Leave a review</h3>
+<div class="field"><label for="rname">Your first name</label><input id="rname" autocomplete="given-name" maxlength="60"></div>
+<div class="field"><label id="rlbl">Your rating</label>
+<div class="rate" role="radiogroup" aria-labelledby="rlbl">
+<input type="radio" name="rate" id="r5" value="5"><label for="r5" title="5 stars">★<span class="hp"> 5 stars</span></label>
+<input type="radio" name="rate" id="r4" value="4"><label for="r4" title="4 stars">★<span class="hp"> 4 stars</span></label>
+<input type="radio" name="rate" id="r3" value="3"><label for="r3" title="3 stars">★<span class="hp"> 3 stars</span></label>
+<input type="radio" name="rate" id="r2" value="2"><label for="r2" title="2 stars">★<span class="hp"> 2 stars</span></label>
+<input type="radio" name="rate" id="r1" value="1"><label for="r1" title="1 star">★<span class="hp"> 1 star</span></label>
+</div></div>
+<div class="field"><label for="rtext">Your review</label><textarea id="rtext" rows="4" maxlength="1000" placeholder="How was your visit?"></textarea></div>
+<div class="hp" aria-hidden="true"><label for="rsite">Leave this empty</label><input id="rsite" tabindex="-1" autocomplete="off"></div>
+<button class="btn" id="rsend" type="button">Submit review</button>
+<p class="rmsg" id="rmsg" role="status"></p>
+<p class="hint" style="color:var(--muted)">Reviews are checked by our team before they appear. Please don’t include medical details or web links.</p>
 </div>
 </div></section>
 </main>
@@ -406,7 +460,7 @@ $("submit").onclick=function(){
  var name=$("name").value.trim(),phone=$("phone").value.trim(),email=$("email").value.trim(),err=$("err");
  if(!dateEl.value||!chosen){err.textContent="Please choose a date and time.";return}
  if(!name){err.textContent="Please enter your name.";return}
- if(!phone&&!email){err.textContent="Please add a phone number or email so we can confirm.";return}
+ if(!phone){err.textContent="Please add your phone number so we can confirm on WhatsApp.";return}
  if(email&&!/^\S+@\S+\.\S+$/.test(email)){err.textContent="That email address doesn’t look right.";return}
  err.textContent="";
  var p=dateEl.value.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);
@@ -418,13 +472,13 @@ $("submit").onclick=function(){
   btn.disabled=false;btn.textContent="Request appointment";
   $("mailLink").href="https://wa.me/"+WA+"?text="+encodeURIComponent(body);
   $("doneTitle").textContent=ok?"Request sent!":"Almost done!";
-  $("doneMsg").textContent=svc+" on "+nice+" at "+chosen+". "+(ok?"We’ve received your request and will contact you to confirm.":"");
+  $("doneMsg").textContent=svc+" on "+nice+" at "+chosen+". "+(ok?"We’ve received your request and will confirm it on WhatsApp.":"");
   $("fallback").style.display=ok?"none":"block";
   $("formArea").style.display="none";$("done").style.display="block";
  }
- fetch("/api/book",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service:svc,date:nice,time:chosen,name:name,phone:phone,email:email,notes:$("notes").value.trim()})})
+ fetch("/api/request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service:svc,date:nice,iso:dateEl.value,time:chosen,name:name,phone:phone,email:email,notes:$("notes").value.trim()})})
   .then(function(r){return r.ok?r.json():{}})
-  .then(function(j){finish(!!j.whatsappSent)})
+  .then(function(j){finish(!!j.ok)})
   .catch(function(){finish(false)});
 };
 $("again").onclick=function(){$("fallback").style.display="none";$("done").style.display="none";$("formArea").style.display="block";render()};
@@ -452,6 +506,46 @@ window.addEventListener("pointermove",function(e){
  var dx=e.clientX-cx,dy=e.clientY-cy,d=Math.hypot(dx,dy)||1,m=Math.min(d/6,r.width*.11);
  iris.style.transform="translate("+(dx/d*m)+"px,"+(dy/d*m)+"px)";
 },{passive:true});
+})();
+</script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function stars(n){return new Array(n+1).join("★")+new Array(6-n).join("☆")}
+function load(){
+ var list=$("revList");
+ function note(t){list.innerHTML="";var p=document.createElement("p");p.style.color="var(--muted)";p.textContent=t;list.appendChild(p)}
+ note("Loading reviews…");
+ fetch("/api/reviews").then(function(r){return r.ok?r.json():null}).then(function(d){
+  if(!d){note("Reviews can’t be shown right now. Please check back soon.");return}
+  list.innerHTML="";
+  if(!d.count){var p=document.createElement("p");p.style.color="var(--muted)";p.textContent="No reviews yet. Be the first to share your experience.";list.appendChild(p);return}
+  $("revAvg").textContent=d.avg.toFixed(1);$("revStars").textContent=stars(Math.round(d.avg));
+  $("revCount").textContent=d.count+(d.count===1?" review":" reviews");$("revSum").hidden=false;
+  d.items.forEach(function(r){
+   var c=document.createElement("article");c.className="rcard";
+   var s=document.createElement("div");s.className="stars";s.textContent=stars(r.rating);s.setAttribute("aria-label",r.rating+" out of 5 stars");
+   var t=document.createElement("p");t.textContent=r.text;
+   var b=document.createElement("div");b.className="by";b.textContent=r.name;
+   var w=document.createElement("div");w.className="when";w.textContent=new Date(r.created).toLocaleDateString("en-ZA",{month:"long",year:"numeric"});
+   c.appendChild(s);c.appendChild(t);c.appendChild(b);c.appendChild(w);list.appendChild(c);
+  });
+ }).catch(function(){note("Reviews can’t be shown right now. Please check back soon.")});
+}
+load();
+$("rsend").onclick=function(){
+ var m=$("rmsg"),name=$("rname").value.trim(),text=$("rtext").value.trim(),sel=document.querySelector('input[name="rate"]:checked');
+ m.className="rmsg";
+ if(!name||!sel||text.length<5){m.className="rmsg bad";m.textContent="Please add your name, a star rating and a short comment.";return}
+ var btn=$("rsend");btn.disabled=true;btn.textContent="Sending…";
+ fetch("/api/reviews",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:name,rating:+sel.value,text:text,website:$("rsite").value})})
+  .then(function(r){return r.json().catch(function(){return {}}).then(function(j){return {ok:r.ok,j:j}})})
+  .then(function(x){
+   btn.disabled=false;btn.textContent="Submit review";
+   if(x.ok){m.textContent="Thank you! Your review will appear once our team has checked it.";$("rname").value="";$("rtext").value="";sel.checked=false}
+   else{m.className="rmsg bad";m.textContent=x.j.error||"Sorry, reviews can’t be submitted right now. Please try again later."}
+  }).catch(function(){btn.disabled=false;btn.textContent="Submit review";m.className="rmsg bad";m.textContent="No connection. Please try again."});
+};
 })();
 </script>
 </body>
