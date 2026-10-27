@@ -64,7 +64,7 @@ a{color:inherit}
 </div>
 <script>
 (function(){
-var T=null,items=[],revs=[],tab="pending",cal=new Date(),calSel="";cal.setDate(1);
+var T=null,items=[],revs=[],tab="calendar",cal=new Date(),calSel="";cal.setDate(1);
 try{T=sessionStorage.getItem("hev_t")}catch(e){}
 var $=function(i){return document.getElementById(i)};
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
@@ -86,7 +86,7 @@ function load(){
 }
 function draw(){
  var tabs=$("tabs");tabs.innerHTML="";
- [["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["calendar","Calendar"],["reviews","Reviews"]].forEach(function(t){
+ [["calendar","Calendar"],["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"]].forEach(function(t){
   var n=t[0]==="reviews"?revs.filter(function(a){return a.status==="pending"}).length:t[0]==="all"?items.length:items.filter(function(a){return a.status===t[0]}).length;
   var b=el("button","",t[0]==="calendar"?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
   b.onclick=function(){tab=t[0];draw()};tabs.appendChild(b);
