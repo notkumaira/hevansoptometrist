@@ -277,6 +277,24 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
  footer .big{margin-bottom:14px}
 }
 
+/* mobile fixes: header, facts, hours */
+@media (max-width:640px){
+ header .wrap{height:60px;gap:10px}
+ .logo{font-size:1.05rem;gap:8px;white-space:nowrap;min-width:0}
+ .logo svg{width:26px;height:26px;flex:none}
+ nav{gap:0;flex:none}
+ nav .btn.sm{padding:9px 16px;font-size:.84rem;white-space:nowrap}
+ nav .btn.sm .arr{display:none}
+ .facts{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+ .facts>div:last-child{grid-column:1/-1}
+ #hoursTable tr{display:block;padding:14px 0;border-bottom:1px solid var(--line)}
+ #hoursTable tr:last-child{border-bottom:0}
+ #hoursTable td{display:block;padding:2px 0;border:0}
+ #hoursTable td:last-child{text-align:left;white-space:nowrap;margin-top:4px}
+ tr.off{margin:0 -10px;padding:14px 10px!important;border-radius:12px}
+}
+@media (max-width:370px){.logo{font-size:.95rem}nav .btn.sm{padding:8px 12px}}
+
 /* reveal */
 .rv{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
 .rv.in{opacity:1;transform:none}
@@ -369,7 +387,7 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <h3 id="doneTitle">Request sent!</h3>
 <p id="doneMsg"></p>
 <div id="fallback" style="display:none">
-<p class="hint">We couldn’t notify the practice automatically. Please tap the button below to send your request on WhatsApp.</p>
+<p class="hint">Sorry, we couldn’t send your request just now. Please tap the button below to send it to us on WhatsApp instead.</p>
 <p><a class="btn" id="mailLink" href="#" target="_blank" rel="noopener">Send on WhatsApp</a></p>
 </div>
 <p><button class="btn ghost" id="again" type="button">Make another booking</button></p>
@@ -472,15 +490,19 @@ $("submit").onclick=function(){
  function finish(ok){
   btn.disabled=false;btn.textContent="Request appointment";
   $("mailLink").href="https://wa.me/"+WA+"?text="+encodeURIComponent(body);
-  $("doneTitle").textContent=ok?"Request sent!":"Almost done!";
-  $("doneMsg").textContent=svc+" on "+nice+" at "+chosen+". "+(ok?"We’ve received your request and will confirm it on WhatsApp.":"");
+  $("doneTitle").textContent=ok?"Request sent!":"Not sent yet";
+  $("doneMsg").textContent=svc+" on "+nice+" at "+chosen+". "+(ok?"We’ve received your request and will confirm it on WhatsApp.":"Your request has not reached our system.");
   $("fallback").style.display=ok?"none":"block";
   $("formArea").style.display="none";$("done").style.display="block";
  }
- fetch("/api/request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service:svc,date:nice,iso:dateEl.value,time:chosen,name:name,phone:phone,email:email,notes:$("notes").value.trim()})})
-  .then(function(r){return r.ok?r.json():{}})
-  .then(function(j){finish(!!j.ok)})
-  .catch(function(){finish(false)});
+ var payload=JSON.stringify({service:svc,date:nice,iso:dateEl.value,time:chosen,name:name,phone:phone,email:email,notes:$("notes").value.trim()});
+ function send(left){
+  return fetch("/api/request",{method:"POST",headers:{"Content-Type":"application/json"},body:payload})
+   .then(function(r){return r.ok?r.json():Promise.reject()})
+   .then(function(j){if(!j.ok)return Promise.reject();return true})
+   .catch(function(){return left>0?new Promise(function(res){setTimeout(res,1500)}).then(function(){return send(left-1)}):false});
+ }
+ send(1).then(finish);
 };
 $("again").onclick=function(){$("fallback").style.display="none";$("done").style.display="none";$("formArea").style.display="block";render()};
 })();
@@ -490,7 +512,7 @@ $("again").onclick=function(){$("fallback").style.display="none";$("done").style
 // scroll reveal
 var els=document.querySelectorAll(".rv");
 if("IntersectionObserver" in window){
- var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}})},{threshold:.12,rootMargin:"0px 0px -40px 0px"});
+ var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}})},{threshold:.01,rootMargin:"0px 0px -20px 0px"});
  els.forEach(function(el){io.observe(el)});
 }else els.forEach(function(el){el.classList.add("in")});
 // highlight today's opening hours
