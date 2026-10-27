@@ -179,7 +179,8 @@ textarea{resize:vertical}
 /* services */
 .svc{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .svc li{display:grid;grid-template-columns:60px 1fr;gap:8px 24px;padding:32px 0;border-bottom:1px solid var(--line);position:relative;transition:padding .4s cubic-bezier(.2,.7,.2,1)}
-@media (min-width:860px){.svc li{grid-template-columns:200px 1.1fr 1fr;align-items:center}}
+.svc .go-book{grid-column:2;justify-self:start;margin-top:8px}
+@media (min-width:860px){.svc li{grid-template-columns:200px 1.1fr 1fr auto;align-items:center}.svc .go-book{grid-column:auto;margin-top:0}}
 .svc li::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--glow-soft),transparent 70%);opacity:0;transition:opacity .4s;pointer-events:none}
 .svc li:hover::before{opacity:1}
 .svc li:hover{padding-left:16px}
@@ -320,11 +321,11 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <section id="services"><div class="wrap">
 <div class="sec-head rv"><span class="num">01 — Services</span><h2>Everything your eyes <em>need</em>, under one roof.</h2></div>
 <ul class="svc">
-<li class="rv"><span class="n">01</span><h3>Eye examinations</h3><p>Full vision and eye-health checks for all ages, including cataract screening. Referrals to the relevant specialists are included when needed.</p></li>
-<li class="rv"><span class="n">02</span><h3>Free driver’s licence screening</h3><p>A free vision screening for your driver’s licence application or renewal.</p></li>
-<li class="rv"><span class="n">03</span><h3>Contact lenses</h3><p>Fittings, trial lenses and aftercare for daily and monthly lenses.</p></li>
-<li class="rv"><span class="n">04</span><h3>Spectacles</h3><p>Frames and lenses to suit your prescription, lifestyle and budget, with expert fitting.</p></li>
-<li class="rv"><span class="n">05</span><h3>Children’s eyecare</h3><p>Gentle, patient testing to catch problems early and support learning.</p></li>
+<li class="rv"><span class="n">01</span><h3>Eye examinations</h3><p>Full vision and eye-health checks for all ages, including cataract screening. Referrals to the relevant specialists are included when needed.</p><a class="btn sm ghost go-book" href="#book" data-svc="Eye test">Book this <span class="arr">→</span></a></li>
+<li class="rv"><span class="n">02</span><h3>Free driver’s licence screening</h3><p>A free vision screening for your driver’s licence application or renewal.</p><a class="btn sm ghost go-book" href="#book" data-svc="Free driver’s licence screening">Book this <span class="arr">→</span></a></li>
+<li class="rv"><span class="n">03</span><h3>Contact lenses</h3><p>Fittings, trial lenses and aftercare for daily and monthly lenses.</p><a class="btn sm ghost go-book" href="#book" data-svc="Contact lens consultation">Book this <span class="arr">→</span></a></li>
+<li class="rv"><span class="n">04</span><h3>Spectacles</h3><p>Frames and lenses to suit your prescription, lifestyle and budget, with expert fitting.</p><a class="btn sm ghost go-book" href="#book" data-svc="Spectacles collection / adjustment">Book this <span class="arr">→</span></a></li>
+<li class="rv"><span class="n">05</span><h3>Children’s eyecare</h3><p>Gentle, patient testing to catch problems early and support learning.</p><a class="btn sm ghost go-book" href="#book" data-svc="Child’s eye test">Book this <span class="arr">→</span></a></li>
 </ul>
 </div></section>
 
@@ -546,6 +547,16 @@ $("rsend").onclick=function(){
    else{m.className="rmsg bad";m.textContent=x.j.error||"Sorry, reviews can’t be submitted right now. Please try again later."}
   }).catch(function(){btn.disabled=false;btn.textContent="Submit review";m.className="rmsg bad";m.textContent="No connection. Please try again."});
 };
+})();
+</script>
+<script>
+(function(){
+document.querySelectorAll(".go-book").forEach(function(a){
+ a.addEventListener("click",function(){
+  var sel=document.getElementById("service");if(!sel)return;
+  for(var i=0;i<sel.options.length;i++){if(sel.options[i].text===a.getAttribute("data-svc")){sel.selectedIndex=i;break}}
+ });
+});
 })();
 </script>
 </body>
