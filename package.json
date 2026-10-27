@@ -8,6 +8,7 @@
     "drizzle-orm": "^1.0.0-beta.22"
   },
   "devDependencies": {
+    "@netlify/blobs": "^8.1.0"
     "drizzle-kit": "^1.0.0-beta.22"
   }
 }
