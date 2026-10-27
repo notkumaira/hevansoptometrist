@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Appointments | H Evans Optometrist</title>
+<style>
+:root{--bg:#fff;--bg2:#f1f8fb;--tx:#141f4a;--sub:#505a8a;--ln:rgba(20,31,74,.16);--ac:#34accb;--ok:#1f7a4d;--no:#b3261e;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#15120d;--bg2:#1e1a13;--tx:#f2e9d8;--sub:#bfb39b;--ln:rgba(242,233,216,.18);--ac:#eea84a;--ok:#6fcf97;--no:#ff8a7a;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg2);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.4rem;margin:0}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+button,.btn{font:600 .95rem system-ui,sans-serif;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--ac);color:#0a1033;text-decoration:none;display:inline-block}
+button.ghost,.btn.ghost{background:transparent;color:var(--tx);box-shadow:inset 0 0 0 1px var(--ln)}
+button.no{background:transparent;color:var(--no);box-shadow:inset 0 0 0 1px var(--no)}
+button:disabled{opacity:.6;cursor:progress}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.card{background:var(--bg);border:1px solid var(--ln);border-radius:14px;padding:16px;margin-bottom:12px}
+#login{max-width:360px;margin:12vh auto 0}
+input{width:100%;padding:12px 14px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit;margin:8px 0 12px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{background:transparent;color:var(--tx);box-shadow:inset 0 0 0 1px var(--ln)}
+.tabs button[aria-pressed=true]{background:var(--tx);color:var(--bg)}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.row h2{font-size:1.1rem;margin:0}
+.badge{font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:99px;box-shadow:inset 0 0 0 1px currentColor;white-space:nowrap}
+.badge.confirmed{color:var(--ok)}.badge.declined{color:var(--no)}.badge.pending{color:var(--sub)}
+.meta{color:var(--sub);font-size:.92rem;margin:4px 0}
+.meta b{color:var(--tx)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.msg{min-height:1.4em;margin:0 0 12px;font-weight:600}
+.err{color:var(--no)}
+a{color:inherit}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<form id="login" class="card">
+ <h1>Staff sign in</h1>
+ <label for="pw" class="meta">Password</label>
+ <input id="pw" type="password" autocomplete="current-password" required>
+ <p class="msg err" id="loginErr" role="alert"></p>
+ <button type="submit" style="width:100%">Sign in</button>
+</form>
+<div id="app" hidden>
+ <header><h1>Appointments</h1><div><button class="ghost" id="refresh" type="button">Refresh</button> <button class="ghost" id="out" type="button">Log out</button></div></header>
+ <div class="tabs" id="tabs" role="group" aria-label="Filter"></div>
+ <p class="msg" id="msg" role="status"></p>
+ <div id="list"></div>
+</div>
+</div>
+<script>
+(function(){
+var T=null,items=[],revs=[],tab="pending";
+try{T=sessionStorage.getItem("hev_t")}catch(e){}
+var $=function(i){return document.getElementById(i)};
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function api(body){
+ return fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({token:T},body))})
+  .then(function(r){return r.json().catch(function(){return {}}).then(function(j){return {ok:r.ok,status:r.status,j:j}})})
+  .catch(function(){return {ok:false,status:0,j:{error:"No connection. Please try again."}}});
+}
+function say(t,bad){var m=$("msg");m.textContent=t||"";m.className="msg"+(bad?" err":"")}
+function show(on){$("login").hidden=on;$("app").hidden=!on}
+function logout(){T=null;try{sessionStorage.removeItem("hev_t")}catch(e){}show(false)}
+function load(){
+ api({action:"list"}).then(function(r){
+  if(r.status===401){logout();return}
+  if(!r.ok){say(r.j.error||"Couldn’t load appointments.",true);return}
+  items=r.j.items;say("");draw();
+  api({action:"reviews"}).then(function(q){if(q.ok){revs=q.j.items;draw()}});
+ });
+}
+function draw(){
+ var tabs=$("tabs");tabs.innerHTML="";
+ [["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"]].forEach(function(t){
+  var n=t[0]==="reviews"?revs.filter(function(a){return a.status==="pending"}).length:t[0]==="all"?items.length:items.filter(function(a){return a.status===t[0]}).length;
+  var b=el("button","",t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
+  b.onclick=function(){tab=t[0];draw()};tabs.appendChild(b);
+ });
+ if(tab==="reviews"){drawRevs();return}
+ var list=$("list");list.innerHTML="";
+ var shown=items.filter(function(a){return tab==="all"||a.status===tab});
+ if(!shown.length){var e=el("div","card","Nothing here.");e.style.color="var(--sub)";list.appendChild(e);return}
+ shown.forEach(function(a){
+  var c=el("article","card"),h=el("div","row");
+  h.appendChild(el("h2","",a.name));h.appendChild(el("span","badge "+a.status,a.status));c.appendChild(h);
+  var l=el("p","meta");l.appendChild(el("b","",a.date+" at "+a.time));c.appendChild(l);
+  c.appendChild(el("p","meta",a.service));
+  var ph=el("p","meta");var tel=el("a","",a.phone);tel.href="tel:"+a.phone.replace(/[^\d+]/g,"");ph.appendChild(tel);
+  if(a.email)ph.appendChild(document.createTextNode(" · "+a.email));c.appendChild(ph);
+  if(a.notes)c.appendChild(el("p","meta","Notes: "+a.notes));
+  var acts=el("div","acts");
+  if(a.status!=="confirmed")acts.appendChild(btn("Approve","",function(b){set(a,"confirmed",b)}));
+  if(a.status!=="declined")acts.appendChild(btn(a.status==="confirmed"?"Cancel":"Decline","no",function(b){set(a,"declined",b)}));
+  if(a.wa){var w=el("a","btn ghost",a.status==="confirmed"?"Message on WhatsApp":"Message on WhatsApp");w.href=a.wa;w.target="_blank";w.rel="noopener";acts.appendChild(w)}
+  c.appendChild(acts);list.appendChild(c);
+ });
+}
+function btn(t,c,f){var b=el("button",c,t);b.type="button";b.onclick=function(){f(b)};return b}
+function drawRevs(){
+ var list=$("list");list.innerHTML="";
+ if(!revs.length){var e=el("div","card","No reviews yet.");e.style.color="var(--sub)";list.appendChild(e);return}
+ var cls={approved:"confirmed",rejected:"declined",pending:"pending"};
+ revs.forEach(function(r){
+  var c=el("article","card"),h=el("div","row");
+  h.appendChild(el("h2","",r.name));h.appendChild(el("span","badge "+cls[r.status],r.status));c.appendChild(h);
+  c.appendChild(el("p","meta",new Array(r.rating+1).join("★")+new Array(6-r.rating).join("☆")+" · "+new Date(r.created).toLocaleDateString("en-ZA")));
+  c.appendChild(el("p","",r.text));
+  var acts=el("div","acts");
+  if(r.status!=="approved")acts.appendChild(btn("Approve and show","",function(b){setRev(r,"approved",b)}));
+  if(r.status==="approved")acts.appendChild(btn("Hide","no",function(b){setRev(r,"rejected",b)}));
+  if(r.status==="pending")acts.appendChild(btn("Reject","no",function(b){setRev(r,"rejected",b)}));
+  acts.appendChild(btn("Delete","no",function(b){if(confirm("Delete this review permanently?"))setRev(r,"delete",b)}));
+  c.appendChild(acts);list.appendChild(c);
+ });
+}
+function setRev(r,status,b){
+ b.disabled=true;
+ api({action:"review_set",id:r.id,status:status}).then(function(x){
+  b.disabled=false;
+  if(x.status===401){logout();return}
+  if(!x.ok){say(x.j.error||"Couldn’t update. Please try again.",true);return}
+  revs=status==="delete"?revs.filter(function(q){return q.id!==r.id}):revs.map(function(q){return q.id===r.id?x.j.item:q});
+  say(status==="approved"?"Review is now showing on the website.":"Updated.");draw();
+ });
+}
+function set(a,status,b){
+ if(status==="declined"&&!confirm("Decline or cancel the appointment for "+a.name+"?"))return;
+ b.disabled=true;
+ api({action:"update",id:a.id,status:status}).then(function(r){
+  b.disabled=false;
+  if(r.status===401){logout();return}
+  if(!r.ok){say(r.j.error||"Couldn’t update. Please try again.",true);return}
+  items=items.map(function(x){return x.id===a.id?r.j.item:x});
+  if(status==="confirmed")say(r.j.sent?"Confirmed. WhatsApp sent to "+a.name+".":"Confirmed. Tap “Message on WhatsApp” on their card to notify "+a.name+".");
+  else say("Updated. Tap “Message on WhatsApp” to let "+a.name+" know.");
+  draw();
+ });
+}
+$("login").onsubmit=function(e){
+ e.preventDefault();var b=e.target.querySelector("button");b.disabled=true;$("loginErr").textContent="";
+ api({action:"login",password:$("pw").value}).then(function(r){
+  b.disabled=false;
+  if(!r.ok){$("loginErr").textContent=r.j.error||"Couldn’t sign in.";return}
+  T=r.j.token;try{sessionStorage.setItem("hev_t",T)}catch(x){}
+  $("pw").value="";show(true);load();
+ });
+};
+$("refresh").onclick=load;$("out").onclick=logout;
+if(T){show(true);load()}
+setInterval(function(){if(T&&!document.hidden)load()},60000);
+})();
+</script>
+</body>
+</html>
