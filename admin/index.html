@@ -34,6 +34,15 @@ input{width:100%;padding:12px 14px;border:1px solid var(--ln);border-radius:10px
 .msg{min-height:1.4em;margin:0 0 12px;font-weight:600}
 .err{color:var(--no)}
 a{color:inherit}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:14px}
+.dow{font-size:.7rem;text-align:center;color:var(--sub);font-weight:700;text-transform:uppercase;padding-bottom:2px}
+.day{min-height:56px;border:1px solid var(--ln);background:var(--bg);color:var(--tx);border-radius:10px;padding:6px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;font-weight:600;cursor:pointer}
+.day.empty{border:0;background:transparent;pointer-events:none}
+.day.today{box-shadow:inset 0 0 0 2px var(--ac)}
+.day.sel{background:var(--tx);color:var(--bg)}
+.cnt{align-self:flex-end;font-size:.75rem;min-width:22px;text-align:center;padding:1px 6px;border-radius:99px;background:var(--ok);color:var(--bg)}
+.cnt.p{background:var(--ac);color:#0a1033}
+@media (max-width:480px){.cal{gap:3px}.day{min-height:48px;padding:4px}}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -55,7 +64,7 @@ a{color:inherit}
 </div>
 <script>
 (function(){
-var T=null,items=[],revs=[],tab="pending";
+var T=null,items=[],revs=[],tab="pending",cal=new Date(),calSel="";cal.setDate(1);
 try{T=sessionStorage.getItem("hev_t")}catch(e){}
 var $=function(i){return document.getElementById(i)};
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
@@ -77,11 +86,12 @@ function load(){
 }
 function draw(){
  var tabs=$("tabs");tabs.innerHTML="";
- [["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"]].forEach(function(t){
+ [["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["calendar","Calendar"],["reviews","Reviews"]].forEach(function(t){
   var n=t[0]==="reviews"?revs.filter(function(a){return a.status==="pending"}).length:t[0]==="all"?items.length:items.filter(function(a){return a.status===t[0]}).length;
-  var b=el("button","",t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
+  var b=el("button","",t[0]==="calendar"?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
   b.onclick=function(){tab=t[0];draw()};tabs.appendChild(b);
  });
+ if(tab==="calendar"){drawCal();return}
  if(tab==="reviews"){drawRevs();return}
  var list=$("list");list.innerHTML="";
  var shown=items.filter(function(a){return tab==="all"||a.status===tab});
@@ -99,6 +109,51 @@ function draw(){
   if(a.status!=="declined")acts.appendChild(btn(a.status==="confirmed"?"Cancel":"Decline","no",function(b){set(a,"declined",b)}));
   if(a.wa){var w=el("a","btn ghost",a.status==="confirmed"?"Message on WhatsApp":"Message on WhatsApp");w.href=a.wa;w.target="_blank";w.rel="noopener";acts.appendChild(w)}
   c.appendChild(acts);list.appendChild(c);
+ });
+}
+var CAL_NOTE="Highlighted badge = day has requests waiting. Green badge = all confirmed. Declined are hidden.";
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function drawCal(){
+ var list=$("list");list.innerHTML="";
+ var by={};items.forEach(function(a){if(a.status!=="declined"){(by[a.iso]=by[a.iso]||[]).push(a)}});
+ var y=cal.getFullYear(),m=cal.getMonth(),todayKey=iso(new Date());
+ var c=el("div","card"),h=el("div","row");h.style.alignItems="center";
+ var pv=btn("‹","ghost",function(){cal.setMonth(m-1);calSel="";draw()});pv.setAttribute("aria-label","Previous month");
+ var nx=btn("›","ghost",function(){cal.setMonth(m+1);calSel="";draw()});nx.setAttribute("aria-label","Next month");
+ h.appendChild(pv);h.appendChild(el("h2","",cal.toLocaleDateString("en-ZA",{month:"long",year:"numeric"})));h.appendChild(nx);c.appendChild(h);
+ var g=el("div","cal");
+ ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(function(d){g.appendChild(el("div","dow",d))});
+ var lead=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate(),i;
+ for(i=0;i<lead;i++)g.appendChild(el("div","day empty"));
+ for(i=1;i<=days;i++){(function(d){
+  var key=iso(new Date(y,m,d)),ap=by[key]||[];
+  var cell=el("button","day"+(key===todayKey?" today":"")+(key===calSel?" sel":""));cell.type="button";
+  cell.appendChild(el("span","",String(d)));
+  if(ap.length){
+   var pend=ap.some(function(a){return a.status==="pending"});
+   cell.appendChild(el("span","cnt"+(pend?" p":""),String(ap.length)));
+   cell.setAttribute("aria-label",d+" "+cal.toLocaleDateString("en-ZA",{month:"long"})+": "+ap.length+(ap.length===1?" appointment":" appointments"));
+  }
+  cell.onclick=function(){calSel=key;draw()};
+  g.appendChild(cell);
+ })(i)}
+ c.appendChild(g);c.appendChild(el("p","meta",CAL_NOTE));list.appendChild(c);
+ var day=calSel||(todayKey.slice(0,7)===iso(cal).slice(0,7)?todayKey:"");
+ if(!day){list.appendChild(el("p","meta","Tap a day to see its appointments."));return}
+ var ap=(by[day]||[]).slice().sort(function(a,b){return a.time.localeCompare(b.time)});
+ var hd=el("h2","",new Date(day+"T00:00:00").toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"}));hd.style.cssText="font-size:1.1rem;margin:20px 0 10px";list.appendChild(hd);
+ if(!ap.length){list.appendChild(el("div","card","No appointments this day."));return}
+ ap.forEach(function(a){
+  var cd=el("article","card"),r=el("div","row");
+  r.appendChild(el("h2","",a.time+" · "+a.name));r.appendChild(el("span","badge "+a.status,a.status));cd.appendChild(r);
+  cd.appendChild(el("p","meta",a.service));
+  var ph=el("p","meta");var tel=el("a","",a.phone);tel.href="tel:"+a.phone.replace(/[^\d+]/g,"");ph.appendChild(tel);cd.appendChild(ph);
+  if(a.notes)cd.appendChild(el("p","meta","Notes: "+a.notes));
+  var acts=el("div","acts");
+  if(a.status!=="confirmed")acts.appendChild(btn("Approve","",function(b){set(a,"confirmed",b)}));
+  acts.appendChild(btn(a.status==="confirmed"?"Cancel":"Decline","no",function(b){set(a,"declined",b)}));
+  if(a.wa){var w=el("a","btn ghost","Message on WhatsApp");w.href=a.wa;w.target="_blank";w.rel="noopener";acts.appendChild(w)}
+  cd.appendChild(acts);list.appendChild(cd);
  });
 }
 function btn(t,c,f){var b=el("button",c,t);b.type="button";b.onclick=function(){f(b)};return b}
