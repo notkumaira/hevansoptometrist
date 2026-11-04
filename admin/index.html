@@ -207,8 +207,8 @@ function set(a,status,b){
   if(r.status===401){logout();return}
   if(!r.ok){say(r.j.error||"Couldn’t update. Please try again.",true);return}
   items=items.map(function(x){return x.id===a.id?r.j.item:x});
-  if(status==="confirmed")say(r.j.sent?"Confirmed. WhatsApp sent to "+a.name+".":"Confirmed. Tap “Message on WhatsApp” on their card to notify "+a.name+".");
-  else say("Updated. Tap “Message on WhatsApp” to let "+a.name+" know.");
+  if(status==="confirmed")say(r.j.sent?"Confirmed. WhatsApp confirmation sent to "+a.name+".":(!a.whatsappConsent?"Confirmed. No WhatsApp consent was given; please contact "+a.name+" by phone.":"Confirmed, but Twilio did not send the WhatsApp message. Check the Twilio and Netlify settings, then contact "+a.name+" manually."));
+  else say("Updated. Please contact "+a.name+" by phone if they need to be notified.");
   draw();
  });
 }
