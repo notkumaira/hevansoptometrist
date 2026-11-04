@@ -46,7 +46,7 @@ export default async (req) => {
 
   if (b.action === "login") {
     if (typeof b.password === "string" && same(sign(b.password), sign(process.env.ADMIN_PASSWORD))) {
-      const exp = String(Date.now() + 12 * 3600e3);
+      const exp = String(Date.now() + (b.remember ? 30 * 24 : 12) * 3600e3);
       return j({ token: exp + "." + sign(exp) });
     }
     await new Promise((r) => setTimeout(r, 800));
@@ -60,6 +60,10 @@ export default async (req) => {
     const items = (await Promise.all(blobs.map((x) => store.get(x.key, { type: "json" })))).filter(Boolean);
     items.sort((p, q) => (p.iso + p.time).localeCompare(q.iso + q.time) || p.created.localeCompare(q.created));
     return j({ items: items.map((a) => ({ ...a, wa: waLink(a) })) });
+  }
+  if (b.action === "delete") {
+    await store.delete(String(b.id));
+    return j({ ok: true });
   }
   if (b.action === "update" && ["pending", "confirmed", "declined"].includes(b.status)) {
     const a = await store.get(String(b.id), { type: "json" });
