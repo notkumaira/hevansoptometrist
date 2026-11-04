@@ -56,6 +56,7 @@ a{color:inherit}
  <label for="pw" class="meta">Password</label>
  <input id="pw" type="password" autocomplete="current-password" required>
  <p class="msg err" id="loginErr" role="alert"></p>
+ <label class="meta" style="display:flex;gap:10px;align-items:flex-start;margin:0 0 14px"><input id="rem" type="checkbox" style="width:auto;margin:4px 0 0"><span>Keep me signed in on this device for 30 days. Only tick this on a phone or computer you trust.</span></label>
  <button type="submit" style="width:100%">Sign in</button>
 </form>
 <div id="app" hidden>
@@ -68,7 +69,7 @@ a{color:inherit}
 <script>
 (function(){
 var T=null,items=[],revs=[],tab="calendar",cal=new Date(),calSel="";cal.setDate(1);
-try{T=sessionStorage.getItem("hev_t")}catch(e){}
+try{T=localStorage.getItem("hev_t")||sessionStorage.getItem("hev_t")}catch(e){}
 var $=function(i){return document.getElementById(i)};
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 function api(body){
@@ -78,7 +79,7 @@ function api(body){
 }
 function say(t,bad){var m=$("msg");m.textContent=t||"";m.className="msg"+(bad?" err":"")}
 function show(on){$("login").hidden=on;$("app").hidden=!on}
-function logout(){T=null;try{sessionStorage.removeItem("hev_t")}catch(e){}show(false)}
+function logout(){T=null;try{sessionStorage.removeItem("hev_t");localStorage.removeItem("hev_t")}catch(e){}show(false)}
 function load(){
  api({action:"list"}).then(function(r){
   if(r.status===401){logout();return}
@@ -110,6 +111,7 @@ function draw(){
   var acts=el("div","acts");
   if(a.status!=="confirmed")acts.appendChild(btn("Approve","",function(b){set(a,"confirmed",b)}));
   if(a.status!=="declined")acts.appendChild(btn(a.status==="confirmed"?"Cancel":"Decline","no",function(b){set(a,"declined",b)}));
+  if(a.status==="declined")acts.appendChild(btn("Delete","no",function(b){del(a,b)}));
   if(a.wa){var w=el("a","btn ghost",a.status==="confirmed"?"Message on WhatsApp":"Message on WhatsApp");w.href=a.wa;w.target="_blank";w.rel="noopener";acts.appendChild(w)}
   c.appendChild(acts);list.appendChild(c);
  });
@@ -187,6 +189,16 @@ function setRev(r,status,b){
   say(status==="approved"?"Review is now showing on the website.":"Updated.");draw();
  });
 }
+function del(a,b){
+ if(!confirm("Permanently delete the appointment for "+a.name+"? This can’t be undone."))return;
+ b.disabled=true;
+ api({action:"delete",id:a.id}).then(function(r){
+  b.disabled=false;
+  if(r.status===401){logout();return}
+  if(!r.ok){say(r.j.error||"Couldn’t delete. Please try again.",true);return}
+  items=items.filter(function(x){return x.id!==a.id});say("Deleted.");draw();
+ });
+}
 function set(a,status,b){
  if(status==="declined"&&!confirm("Decline or cancel the appointment for "+a.name+"?"))return;
  b.disabled=true;
@@ -202,10 +214,10 @@ function set(a,status,b){
 }
 $("login").onsubmit=function(e){
  e.preventDefault();var b=e.target.querySelector("button");b.disabled=true;$("loginErr").textContent="";
- api({action:"login",password:$("pw").value}).then(function(r){
+ api({action:"login",password:$("pw").value,remember:$("rem").checked}).then(function(r){
   b.disabled=false;
   if(!r.ok){$("loginErr").textContent=r.j.error||"Couldn’t sign in.";return}
-  T=r.j.token;try{sessionStorage.setItem("hev_t",T)}catch(x){}
+  T=r.j.token;try{(($("rem").checked)?localStorage:sessionStorage).setItem("hev_t",T)}catch(x){}
   $("pw").value="";show(true);load();
  });
 };
@@ -216,3 +228,4 @@ setInterval(function(){if(T&&!document.hidden)load()},60000);
 </script>
 </body>
 </html>
+
