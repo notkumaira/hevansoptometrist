@@ -382,6 +382,12 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 </div>
 <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email"></div>
 <div class="field"><label for="notes">Anything we should know? (optional)</label><textarea id="notes" rows="3" placeholder="e.g. headaches, new to contact lenses, medical aid details"></textarea></div>
+<div class="field" style="margin-top:12px">
+<label style="display:flex;gap:10px;align-items:flex-start;font-weight:400;line-height:1.5">
+<input id="whatsappConsent" type="checkbox" style="width:auto;flex:0 0 auto;margin:4px 0 0">
+<span>I agree to receive WhatsApp messages from H Evans Optometrist about this appointment, including confirmation or changes. I understand I can contact the practice to withdraw this consent.</span>
+</label>
+</div>
 <div class="err" id="err" role="alert"></div>
 <button class="btn" id="submit" type="button">Request appointment</button>
 </div>
@@ -498,7 +504,7 @@ $("submit").onclick=function(){
   $("fallback").style.display=ok?"none":"block";
   $("formArea").style.display="none";$("done").style.display="block";
  }
- var payload=JSON.stringify({service:svc,date:nice,iso:dateEl.value,time:chosen,name:name,phone:phone,email:email,notes:$("notes").value.trim()});
+ var payload=JSON.stringify({service:svc,date:nice,iso:dateEl.value,time:chosen,name:name,phone:phone,email:email,notes:$("notes").value.trim(),whatsappConsent:$("whatsappConsent").checked});
  function send(left){
   return fetch("/api/request",{method:"POST",headers:{"Content-Type":"application/json"},body:payload})
    .then(function(r){return r.ok?r.json():Promise.reject()})
