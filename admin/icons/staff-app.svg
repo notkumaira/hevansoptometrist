@@ -1,7 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#141f4a"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#f1f8fb" stroke-width="26"/>
-  <circle cx="256" cy="256" r="72" fill="#34accb"/>
-  <circle cx="256" cy="256" r="30" fill="#141f4a"/>
-  <path d="M256 55v58M256 399v58M55 256h58M399 256h58" stroke="#f1f8fb" stroke-width="18" stroke-linecap="round"/>
+  <style>
+    .bg{fill:#f7f3ed}.line,.star{fill:none;stroke:#14264f}.star{fill:#14264f;stroke:none}
+    @media(prefers-color-scheme:dark){.bg{fill:#091326}.line{stroke:#f5efe4}.star{fill:#f5efe4}}
+  </style>
+  <rect class="bg" width="512" height="512" rx="112"/>
+  <g class="line" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M105 206a160 160 0 0 1 128-104M407 206a160 160 0 0 0-128-104" stroke-width="12"/>
+    <path d="M105 306a160 160 0 0 0 128 104M407 306a160 160 0 0 1-128 104" stroke-width="12"/>
+    <path d="M78 232c0-16 13-29 29-29h91c36 0 65 29 65 65v17c0 48-31 88-76 88h-20c-45 0-76-36-76-82v-30c-8-3-13-13-13-29Zm356 0c0-16-13-29-29-29h-91c-36 0-65 29-65 65v17c0 48 31 88 76 88h20c45 0 76-36 76-82v-30c8-3 13-13 13-29Z" stroke-width="15"/>
+    <path d="M263 265h-14" stroke-width="15"/>
+    <path d="M106 232H78m356 0h-28" stroke-width="15"/>
+  </g>
+  <g class="star">
+    <path d="M256 70c5 52 8 57 35 64-27 7-30 12-35 64-5-52-8-57-35-64 27-7 30-12 35-64Z"/>
+    <path d="M256 314c5 52 8 57 35 64-27 7-30 12-35 64-5-52-8-57-35-64 27-7 30-12 35-64Z"/>
+  </g>
 </svg>
