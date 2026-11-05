@@ -489,10 +489,11 @@ var installBtn=document.getElementById("installAppButton"),howBtn=document.getEl
 var instructions=document.getElementById("installInstructions"),deferred=null;
 var dismissedKey="hevans-patient-install-dismissed";
 var standalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
-if(standalone||localStorage.getItem(dismissedKey)==="1")return;
+var dismissedAt=Number(localStorage.getItem(dismissedKey)||0);
+if(standalone||(dismissedAt&&Date.now()-dismissedAt<30*24*60*60*1000))return;
 function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
 function show(){box.classList.add("show")}
-function dismiss(){box.classList.remove("show");localStorage.setItem(dismissedKey,"1")}
+function dismiss(){box.classList.remove("show");localStorage.setItem(dismissedKey,String(Date.now()))}
 function instructionsForDevice(){
  if(isIOS())return "<strong>On iPhone or iPad</strong><ol><li>Open this website in Safari.</li><li>Tap the Share button.</li><li>Choose “Add to Home Screen”.</li><li>Tap “Add” to install.</li></ol>";
  return "<strong>On Android</strong><ol><li>Open this website in Chrome.</li><li>Tap the browser menu (⋮).</li><li>Choose “Install app” or “Add to Home screen”.</li></ol><strong>On a computer</strong><ol><li>Look for the install icon in the address bar, or open the browser menu.</li><li>Choose “Install H Evans Optometrist”.</li></ol>";
@@ -505,7 +506,7 @@ installBtn.addEventListener("click",async function(){
 document.getElementById("installNudgeClose").addEventListener("click",dismiss);
 document.getElementById("installNotNow").addEventListener("click",dismiss);
 window.addEventListener("beforeinstallprompt",function(event){event.preventDefault();deferred=event;installBtn.textContent="Install app"});
-window.addEventListener("appinstalled",function(){box.classList.remove("show");localStorage.setItem(dismissedKey,"1")});
+window.addEventListener("appinstalled",function(){box.classList.remove("show");localStorage.setItem(dismissedKey,String(Date.now()))});
 if(isIOS()){installBtn.textContent="View iPhone instructions";installBtn.addEventListener("click",function(){instructions.innerHTML=instructionsForDevice();instructions.classList.add("show")})}
 setTimeout(show,2200);
 if("serviceWorker" in navigator){navigator.serviceWorker.register("/patient/service-worker.js").catch(function(error){console.warn("Patient app service worker registration failed",error)})}
