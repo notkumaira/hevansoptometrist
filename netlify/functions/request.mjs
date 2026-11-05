@@ -1,5 +1,6 @@
 // Public: saves a booking request as "pending" for staff to approve.
 import { getStore } from "@netlify/blobs";
+import webpush from "web-push";
 
 export const config = { path: "/api/request" };
 
@@ -53,6 +54,55 @@ async function notifyStaff(a) {
   await Promise.allSettled(recipients.map((to) => sendTwilioWhatsApp(to, body)));
 }
 
+// Push messages intentionally contain no patient name, phone number, email or clinical notes.
+async function notifyStaffPush() {
+  const publicKey = process.env.PUSH_VAPID_PUBLIC_KEY;
+  const privateKey = process.env.PUSH_VAPID_PRIVATE_KEY;
+  if (!publicKey || !privateKey) return;
+
+  try {
+    webpush.setVapidDetails(
+      process.env.PUSH_VAPID_SUBJECT || "mailto:admin@hevansoptometrist.co.za",
+      publicKey,
+      privateKey
+    );
+    const store = getStore("staff-push-subscriptions");
+    const users = getStore("staff-users");
+    const { blobs } = await store.list();
+    const subscriptions = await Promise.all(
+      blobs.map(async (blob) => {
+        const value = await store.get(blob.key, { type: "json" });
+        const user = value?.userId ? await users.get(value.userId, { type: "json" }) : null;
+        return { key: blob.key, value, active: Boolean(user && !user.disabled) };
+      })
+    );
+    const payload = JSON.stringify({
+      title: "H Evans Optometrist",
+      body: "A new appointment request has arrived. Sign in to review it.",
+      url: "/admin/"
+    });
+    await Promise.allSettled(subscriptions.filter((entry) => entry.active && entry.value?.endpoint && entry.value?.keys)
+      .map(async ({ key, value }) => {
+        try {
+          await webpush.sendNotification(
+            { endpoint: value.endpoint, keys: value.keys },
+            payload,
+            { TTL: 60 }
+          );
+        } catch (error) {
+          if (error.statusCode === 404 || error.statusCode === 410) {
+            await store.delete(key);
+          } else {
+            console.error("Staff push notification failed:", error?.message || error);
+          }
+        }
+      }));
+  } catch (error) {
+    // Notification failures must never prevent a patient from submitting a booking.
+    console.error("Staff push notification setup failed:", error?.message || error);
+  }
+}
+
 export default async (req) => {
   if (req.method !== "POST") return j({ error: "POST only" }, 405);
   let b;
@@ -69,6 +119,6 @@ export default async (req) => {
   if (!a.service || !a.date || !/^\d{4}-\d{2}-\d{2}$/.test(a.iso) || !/^\d{2}:\d{2}$/.test(a.time) || !a.name || !a.phone)
     return j({ error: "Missing details" }, 400);
   await getStore("appointments").setJSON(a.id, a);
-  await notifyStaff(a);
+  await Promise.allSettled([notifyStaff(a), notifyStaffPush()]);
   return j({ ok: true });
 };
