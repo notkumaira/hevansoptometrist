@@ -57,11 +57,25 @@ a{color:inherit}
 <div class="wrap">
 <form id="login" class="card">
  <h1>Staff sign in</h1>
+ <label for="username" class="meta">Username</label>
+ <input id="username" autocomplete="username" required>
  <label for="pw" class="meta">Password</label>
  <input id="pw" type="password" autocomplete="current-password" required>
  <p class="msg err" id="loginErr" role="alert"></p>
  <label class="meta" style="display:flex;gap:10px;align-items:flex-start;margin:0 0 14px"><input id="rem" type="checkbox" style="width:auto;margin:4px 0 0"><span>Keep me signed in on this device for 30 days. Only tick this on a phone or computer you trust.</span></label>
  <button type="submit" style="width:100%">Sign in</button>
+ <p class="meta" style="margin-top:14px">First time setting up staff access? <button type="button" class="ghost" id="showSetup">Set up doctor account</button></p>
+</form>
+<form id="setup" class="card" hidden>
+ <h1>Initial doctor setup</h1>
+ <p class="meta">This creates the owner account. The setup key must first be added to Netlify environment variables.</p>
+ <label class="meta" for="setupSecret">Setup key</label><input id="setupSecret" type="password" required autocomplete="off">
+ <label class="meta" for="doctorName">Doctor name</label><input id="doctorName" required>
+ <label class="meta" for="doctorUsername">Username</label><input id="doctorUsername" required autocomplete="username">
+ <label class="meta" for="doctorPassword">Password (at least 12 characters)</label><input id="doctorPassword" type="password" required minlength="12" autocomplete="new-password">
+ <p class="msg err" id="setupErr" role="alert"></p>
+ <button type="submit" style="width:100%">Create doctor account</button>
+ <p class="meta"><button type="button" class="ghost" id="hideSetup">Back to sign in</button></p>
 </form>
 <div id="app" hidden>
  <header><h1>Appointments</h1><div><button class="ghost" id="install" type="button" hidden>Install app</button> <button class="ghost" id="refresh" type="button">Refresh</button> <button class="ghost" id="out" type="button">Log out</button></div></header>
@@ -98,7 +112,7 @@ if(installButton){
 window.addEventListener("appinstalled",function(){
   if(installButton)installButton.hidden=true;
 });
-var T=null,items=[],revs=[],tab="calendar",cal=new Date(),calSel="";cal.setDate(1);
+var T=null,items=[],revs=[],currentUser=null,tab="calendar",cal=new Date(),calSel="";cal.setDate(1);
 try{T=localStorage.getItem("hev_t")||sessionStorage.getItem("hev_t")}catch(e){}
 var $=function(i){return document.getElementById(i)};
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
@@ -108,7 +122,7 @@ function api(body){
   .catch(function(){return {ok:false,status:0,j:{error:"No connection. Please try again."}}});
 }
 function say(t,bad){var m=$("msg");m.textContent=t||"";m.className="msg"+(bad?" err":"")}
-function show(on){$("login").hidden=on;$("app").hidden=!on}
+function show(on){$("login").hidden=on;$("setup").hidden=true;$("app").hidden=!on}
 function logout(){T=null;try{sessionStorage.removeItem("hev_t");localStorage.removeItem("hev_t")}catch(e){}show(false)}
 function load(){
  api({action:"list"}).then(function(r){
@@ -120,13 +134,14 @@ function load(){
 }
 function draw(){
  var tabs=$("tabs");tabs.innerHTML="";
- [["calendar","Calendar"],["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"]].forEach(function(t){
+ [["calendar","Calendar"],["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"]].concat(currentUser&&currentUser.role==="doctor"?[["staff","Staff accounts"]]:[]).forEach(function(t){
   var n=t[0]==="reviews"?revs.filter(function(a){return a.status==="pending"}).length:t[0]==="all"?items.length:items.filter(function(a){return a.status===t[0]}).length;
   var b=el("button","",t[0]==="calendar"?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
   b.onclick=function(){tab=t[0];draw()};tabs.appendChild(b);
  });
  if(tab==="calendar"){drawCal();return}
  if(tab==="reviews"){drawRevs();return}
+ if(tab==="staff"){drawStaff();return}
  var list=$("list");list.innerHTML="";
  var shown=items.filter(function(a){return tab==="all"||a.status===tab});
  if(!shown.length){var e=el("div","card","Nothing here.");e.style.color="var(--sub)";list.appendChild(e);return}
@@ -192,6 +207,17 @@ function drawCal(){
  });
 }
 function btn(t,c,f){var b=el("button",c,t);b.type="button";b.onclick=function(){f(b)};return b}
+function drawStaff(){
+ var list=$("list");list.innerHTML="";
+ var form=el("form","card");form.appendChild(el("h2","","Add staff member"));
+ var name=el("input");name.placeholder="Full name";name.required=true;name.autocomplete="name";
+ var username=el("input");username.placeholder="Username";username.required=true;username.autocomplete="off";
+ var password=el("input");password.placeholder="Temporary password (12+ characters)";password.type="password";password.minLength=12;password.required=true;
+ [name,username,password].forEach(function(x){x.style.marginTop="10px";form.appendChild(x)});
+ var submit=el("button","","Create account");submit.type="submit";form.appendChild(submit);
+ form.onsubmit=function(e){e.preventDefault();submit.disabled=true;api({action:"staff_create",name:name.value,username:username.value,password:password.value}).then(function(r){submit.disabled=false;if(!r.ok){say(r.j.error||"Could not create account.",true);return}say("Staff account created.");drawStaff()})};list.appendChild(form);
+ api({action:"staff_list"}).then(function(r){if(!r.ok){say(r.j.error||"Could not load staff accounts.",true);return}r.j.users.forEach(function(u){var card=el("article","card"),head=el("div","row");head.appendChild(el("h2","",u.name));head.appendChild(el("span","badge "+(u.disabled?"declined":"confirmed"),u.disabled?"disabled":"active"));card.appendChild(head);card.appendChild(el("p","meta","@"+u.username));var actions=el("div","acts");actions.appendChild(btn(u.disabled?"Enable account":"Disable account",u.disabled?"":"no",function(b){b.disabled=true;api({action:u.disabled?"staff_enable":"staff_disable",userId:u.id}).then(function(x){b.disabled=false;if(!x.ok){say(x.j.error||"Could not update account.",true);return}drawStaff()})}));card.appendChild(actions);list.appendChild(card)})});
+}
 function drawRevs(){
  var list=$("list");list.innerHTML="";
  if(!revs.length){var e=el("div","card","No reviews yet.");e.style.color="var(--sub)";list.appendChild(e);return}
@@ -244,15 +270,18 @@ function set(a,status,b){
 }
 $("login").onsubmit=function(e){
  e.preventDefault();var b=e.target.querySelector("button");b.disabled=true;$("loginErr").textContent="";
- api({action:"login",password:$("pw").value,remember:$("rem").checked}).then(function(r){
+ api({action:"login",username:$("username").value,password:$("pw").value,remember:$("rem").checked}).then(function(r){
   b.disabled=false;
   if(!r.ok){$("loginErr").textContent=r.j.error||"Couldn’t sign in.";return}
-  T=r.j.token;try{(($("rem").checked)?localStorage:sessionStorage).setItem("hev_t",T)}catch(x){}
+  T=r.j.token;currentUser=r.j.user;try{(($("rem").checked)?localStorage:sessionStorage).setItem("hev_t",T)}catch(x){}
   $("pw").value="";show(true);load();
  });
 };
 $("refresh").onclick=load;$("out").onclick=logout;
-if(T){show(true);load()}
+ $("showSetup").onclick=function(){$("login").hidden=true;$("setup").hidden=false};
+ $("hideSetup").onclick=function(){$("setup").hidden=true;$("login").hidden=false};
+ $("setup").onsubmit=function(e){e.preventDefault();var b=e.target.querySelector("button[type=submit]");b.disabled=true;$("setupErr").textContent="";api({action:"bootstrap",setupSecret:$("setupSecret").value,name:$("doctorName").value,username:$("doctorUsername").value,password:$("doctorPassword").value}).then(function(r){b.disabled=false;if(!r.ok){$("setupErr").textContent=r.j.error||"Setup failed.";return}$("setup").hidden=true;$("login").hidden=false;$("loginErr").textContent="Doctor account created. Please sign in."; $("username").value=$("doctorUsername").value;$("pw").value=$("doctorPassword").value})};
+if(T){show(true);api({action:"list"}).then(function(r){if(r.status===401){logout();return}load()})}
 setInterval(function(){if(T&&!document.hidden)load()},60000);
 })();
 </script>
