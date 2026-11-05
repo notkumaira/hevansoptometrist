@@ -12,26 +12,78 @@
 :root{color-scheme:light;font-family:Arial,sans-serif;background:#f5f8fa;color:#141f4a}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px}
 main{width:min(100%,560px);background:#fff;border:1px solid #dce6ed;border-radius:24px;padding:clamp(24px,6vw,42px);box-shadow:0 20px 60px #141f4a12}
-.logo{width:72px;height:72px;margin-bottom:24px}h1{font-family:Georgia,serif;font-size:clamp(2rem,8vw,3rem);font-weight:400;line-height:1.05;margin:0 0 14px}
-p{line-height:1.65;color:#56617b}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
-a{display:inline-block;text-decoration:none;background:#141f4a;color:#fff;padding:13px 18px;border-radius:999px;font-weight:700}
-a.secondary{background:#eaf3f7;color:#141f4a}
-.note{font-size:.88rem;border-top:1px solid #e4ebef;margin-top:28px;padding-top:18px}
+.logo{width:64px;height:64px;margin-bottom:18px}h1{font-family:Georgia,serif;font-size:clamp(2rem,8vw,2.8rem);font-weight:400;line-height:1.05;margin:0 0 14px}
+p{line-height:1.6;color:#56617b}.tabs{display:flex;gap:8px;margin:22px 0}.tabs button,.actions button{border:0;border-radius:999px;padding:11px 16px;font-weight:700;cursor:pointer;background:#eaf3f7;color:#141f4a}.tabs button[aria-selected=true],.primary{background:#141f4a!important;color:#fff!important}
+label{display:block;font-weight:700;font-size:.9rem;margin:15px 0 7px}input{width:100%;padding:13px 14px;border:1px solid #cbd7e0;border-radius:10px;font:inherit;color:#141f4a;background:#fff}input:focus{outline:2px solid #34accb;outline-offset:1px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.actions button,.actions a{display:inline-block;text-decoration:none;padding:13px 18px;border-radius:999px;font-weight:700;cursor:pointer;border:0;font-size:.95rem}
+.message{min-height:24px;margin:14px 0 0;font-size:.92rem}.error{color:#a32626}.success{color:#176b43}.hidden{display:none!important}
+.note{font-size:.86rem;border-top:1px solid #e4ebef;margin-top:26px;padding-top:18px}.muted-link{background:none;border:0;color:#245b91;text-decoration:underline;cursor:pointer;padding:8px 0;font:inherit}
+#accountView{background:#f4f8fa;border-radius:14px;padding:18px;margin-top:20px}
 </style>
 </head>
 <body>
 <main>
 <img class="logo" src="/patient/icons/patient-app.svg" alt="">
 <h1>Your eye care, a little closer.</h1>
-<p>Welcome to the H Evans Optometrist patient app. You can continue booking appointments on our website without installing the app or creating an account.</p>
-<div class="actions">
-<a href="/#book">Book an appointment</a>
-<a class="secondary" href="/">Visit our website</a>
+<p>Sign in to your H Evans Optometrist patient account, or create one to get started. You can still book appointments without an account.</p>
+<div id="authView">
+<div class="tabs" role="tablist" aria-label="Patient account">
+<button type="button" id="loginTab" aria-selected="true">Sign in</button>
+<button type="button" id="registerTab" aria-selected="false">Create account</button>
 </div>
-<p class="note">Patient accounts, appointment history and optional push notifications are being prepared. WhatsApp appointment confirmations will remain available for patients who do not install the app.</p>
+<form id="loginForm">
+<label for="loginEmail">Email address</label><input id="loginEmail" type="email" autocomplete="email" required maxlength="254">
+<label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required>
+<div class="actions"><button class="primary" type="submit">Sign in</button></div>
+<button class="muted-link" type="button" id="forgotOpen">Forgot your password?</button>
+</form>
+<form id="registerForm" class="hidden">
+<label for="registerName">Full name</label><input id="registerName" autocomplete="name" required maxlength="100">
+<label for="registerEmail">Email address</label><input id="registerEmail" type="email" autocomplete="email" required maxlength="254">
+<label for="registerPassword">Create password</label><input id="registerPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+<p class="note">Use at least 12 characters. We'll email you a verification link before activating your account.</p>
+<div class="actions"><button class="primary" type="submit">Create account</button></div>
+</form>
+<form id="forgotForm" class="hidden">
+<h2>Reset your password</h2><p>Enter the email address for your account. If it exists, we'll send a reset link.</p>
+<label for="forgotEmail">Email address</label><input id="forgotEmail" type="email" autocomplete="email" required maxlength="254">
+<div class="actions"><button class="primary" type="submit">Send reset link</button><button type="button" id="backLogin">Back to sign in</button></div>
+</form>
+<form id="resetForm" class="hidden">
+<h2>Choose a new password</h2>
+<label for="newPassword">New password</label><input id="newPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+<div class="actions"><button class="primary" type="submit">Update password</button></div>
+</form>
+<p id="status" class="message" role="status" aria-live="polite"></p>
+</div>
+<div id="accountView" class="hidden">
+<strong id="patientGreeting"></strong>
+<p>Your account is active. The appointment-history area is coming next. For now, you can continue to use the public booking form.</p>
+<div class="actions"><a class="primary" href="/#book">Book an appointment</a><button type="button" id="logoutButton">Sign out</button></div>
+</div>
+<div class="actions"><a class="primary" href="/#book">Book without an account</a><a href="/">Visit website</a></div>
+<p class="note">Creating an account is optional. Your account is for appointment access and practice communications; it is not a medical-record portal.</p>
 </main>
 <script>
-if("serviceWorker" in navigator)navigator.serviceWorker.register("/patient/service-worker.js").catch(function(){});
+(function(){
+const $=id=>document.getElementById(id),api="/api/patient";
+const forms=["loginForm","registerForm","forgotForm","resetForm"];
+function show(which){forms.forEach(id=>$(id).classList.toggle("hidden",id!==which));$("status").textContent="";$("status").className="message";$("authView").classList.remove("hidden");$("accountView").classList.add("hidden");}
+function status(message,error){$("status").textContent=message;$("status").className="message "+(error?"error":"success");}
+async function post(body){const r=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(body)});const data=await r.json().catch(()=>({error:"Unexpected server response."}));if(!r.ok)throw new Error(data.error||"Please try again.");return data;}
+$("loginTab").onclick=()=>{show("loginForm");$("loginTab").setAttribute("aria-selected","true");$("registerTab").setAttribute("aria-selected","false")};
+$("registerTab").onclick=()=>{show("registerForm");$("loginTab").setAttribute("aria-selected","false");$("registerTab").setAttribute("aria-selected","true")};
+$("forgotOpen").onclick=()=>show("forgotForm");$("backLogin").onclick=()=>show("loginForm");
+$("loginForm").onsubmit=async e=>{e.preventDefault();try{await post({action:"login",email:$("loginEmail").value,password:$("loginPassword").value});await loadMe()}catch(err){status(err.message,true)}};
+$("registerForm").onsubmit=async e=>{e.preventDefault();try{const d=await post({action:"register",name:$("registerName").value,email:$("registerEmail").value,password:$("registerPassword").value});status(d.message||"Check your email for a verification link.")}catch(err){status(err.message,true)}};
+$("forgotForm").onsubmit=async e=>{e.preventDefault();try{const d=await post({action:"forgot",email:$("forgotEmail").value});status(d.message)}catch(err){status(err.message,true)}};
+$("resetForm").onsubmit=async e=>{e.preventDefault();try{const d=await post({action:"reset",token:new URLSearchParams(location.search).get("reset"),password:$("newPassword").value});history.replaceState(null,"",location.pathname);status("Your password has been updated. Please sign in.");show("loginForm")}catch(err){status(err.message,true)}};
+$("logoutButton").onclick=async()=>{try{await post({action:"logout"});show("loginForm")}catch(err){status(err.message,true)}};
+async function loadMe(){try{const r=await fetch(api+"?action=me",{credentials:"same-origin",cache:"no-store"});if(!r.ok)return;const d=await r.json();$("authView").classList.add("hidden");$("accountView").classList.remove("hidden");$("patientGreeting").textContent="Hello, "+d.patient.name;}catch{}}
+if(new URLSearchParams(location.search).has("reset"))show("resetForm");
+else {show("loginForm");loadMe();}
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/patient/service-worker.js").catch(()=>{});
+})();
 </script>
 </body>
 </html>
