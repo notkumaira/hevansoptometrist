@@ -123,7 +123,7 @@ function api(body){
 }
 function say(t,bad){var m=$("msg");m.textContent=t||"";m.className="msg"+(bad?" err":"")}
 function show(on){$("login").hidden=on;$("setup").hidden=true;$("app").hidden=!on}
-function logout(){T=null;try{sessionStorage.removeItem("hev_t");localStorage.removeItem("hev_t")}catch(e){}show(false)}
+function logout(){T=null;currentUser=null;try{sessionStorage.removeItem("hev_t");localStorage.removeItem("hev_t")}catch(e){}show(false)}
 function load(){
  api({action:"list"}).then(function(r){
   if(r.status===401){logout();return}
@@ -281,7 +281,7 @@ $("refresh").onclick=load;$("out").onclick=logout;
  $("showSetup").onclick=function(){$("login").hidden=true;$("setup").hidden=false};
  $("hideSetup").onclick=function(){$("setup").hidden=true;$("login").hidden=false};
  $("setup").onsubmit=function(e){e.preventDefault();var b=e.target.querySelector("button[type=submit]");b.disabled=true;$("setupErr").textContent="";api({action:"bootstrap",setupSecret:$("setupSecret").value,name:$("doctorName").value,username:$("doctorUsername").value,password:$("doctorPassword").value}).then(function(r){b.disabled=false;if(!r.ok){$("setupErr").textContent=r.j.error||"Setup failed.";return}$("setup").hidden=true;$("login").hidden=false;$("loginErr").textContent="Doctor account created. Please sign in."; $("username").value=$("doctorUsername").value;$("pw").value=$("doctorPassword").value})};
-if(T){show(true);api({action:"list"}).then(function(r){if(r.status===401){logout();return}load()})}
+if(T){show(true);api({action:"me"}).then(function(r){if(r.status===401||!r.ok){logout();return}currentUser=r.j.user;load()})}
 setInterval(function(){if(T&&!document.hidden)load()},60000);
 })();
 </script>
