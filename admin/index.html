@@ -136,7 +136,7 @@ function draw(){
  var tabs=$("tabs");tabs.innerHTML="";
  [["calendar","Calendar"],["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"],["account","My account"]].concat(currentUser&&currentUser.role==="doctor"?[["staff","Staff accounts"],["activity","Activity log"]]:[]).forEach(function(t){
   var n=t[0]==="reviews"?revs.filter(function(a){return a.status==="pending"}).length:t[0]==="all"?items.length:(["pending","confirmed","declined"].indexOf(t[0])>=0?items.filter(function(a){return a.status===t[0]}).length:0);
-  var b=el("button","",(t[0]==="calendar"||t[0]==="account"||t[0]==="staff")?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
+  var b=el("button","",(t[0]==="calendar"||t[0]==="account"||t[0]==="staff"||t[0]==="activity")?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
   b.onclick=function(){tab=t[0];draw()};tabs.appendChild(b);
  });
  if(tab==="calendar"){drawCal();return}
@@ -222,7 +222,7 @@ function drawActivity(){
    var card=el("article","card"),head=el("div","row");
    var action=item.type==="appointment_deleted"?"Deleted appointment":(item.type==="appointment_status"?"Changed appointment status":"Staff activity");
    head.appendChild(el("h2","",action));
-   if(item.status)head.appendChild(el("span","badge "+(item.status==="confirmed"?"confirmed":item.status==="declined"?"declined":"pending"),item.status));
+   if(item.status)head.appendChild(el("span","badge "+(item.status==="confirmed"?"confirmed":(item.status==="declined"||item.status==="deleted")?"declined":"pending"),item.status));
    card.appendChild(head);
    card.appendChild(el("p","meta","By "+item.staffName));
    if(item.appointment){
