@@ -1,4 +1,4 @@
-const CACHE_NAME = "h-evans-staff-shell-v4";
+const CACHE_NAME = "h-evans-staff-shell-v5";
 const APP_SHELL = ["/admin/", "/admin/manifest.webmanifest", "/admin/icons/staff-app.svg"];
 
 self.addEventListener("install", (event) => {
@@ -15,6 +15,36 @@ self.addEventListener("activate", (event) => {
       .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   );
+});
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) {}
+  event.waitUntil(
+    self.registration.showNotification(data.title || "H Evans Optometrist", {
+      body: data.body || "A new appointment request has arrived.",
+      icon: "/admin/icons/staff-app.svg",
+      badge: "/admin/icons/staff-app.svg",
+      data: { url: "/admin/" },
+      tag: "h-evans-new-appointment",
+      renotify: true
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const target = new URL("/admin/", self.location.origin).href;
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const client of windows) {
+      if (client.url.startsWith(self.location.origin + "/admin")) {
+        await client.focus();
+        return;
+      }
+    }
+    await self.clients.openWindow(target);
+  })());
 });
 
 self.addEventListener("fetch", (event) => {
