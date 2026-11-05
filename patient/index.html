@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141f4a">
+<meta name="description" content="The H Evans Optometrist patient app.">
+<link rel="manifest" href="/patient/manifest.webmanifest">
+<link rel="icon" href="/patient/icons/patient-app.svg" type="image/svg+xml">
+<title>H Evans Optometrist | Patient App</title>
+<style>
+:root{color-scheme:light;font-family:Arial,sans-serif;background:#f5f8fa;color:#141f4a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px}
+main{width:min(100%,560px);background:#fff;border:1px solid #dce6ed;border-radius:24px;padding:clamp(24px,6vw,42px);box-shadow:0 20px 60px #141f4a12}
+.logo{width:72px;height:72px;margin-bottom:24px}h1{font-family:Georgia,serif;font-size:clamp(2rem,8vw,3rem);font-weight:400;line-height:1.05;margin:0 0 14px}
+p{line-height:1.65;color:#56617b}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+a{display:inline-block;text-decoration:none;background:#141f4a;color:#fff;padding:13px 18px;border-radius:999px;font-weight:700}
+a.secondary{background:#eaf3f7;color:#141f4a}
+.note{font-size:.88rem;border-top:1px solid #e4ebef;margin-top:28px;padding-top:18px}
+</style>
+</head>
+<body>
+<main>
+<img class="logo" src="/patient/icons/patient-app.svg" alt="">
+<h1>Your eye care, a little closer.</h1>
+<p>Welcome to the H Evans Optometrist patient app. You can continue booking appointments on our website without installing the app or creating an account.</p>
+<div class="actions">
+<a href="/#book">Book an appointment</a>
+<a class="secondary" href="/">Visit our website</a>
+</div>
+<p class="note">Patient accounts, appointment history and optional push notifications are being prepared. WhatsApp appointment confirmations will remain available for patients who do not install the app.</p>
+</main>
+<script>
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/patient/service-worker.js").catch(function(){});
+</script>
+</body>
+</html>
