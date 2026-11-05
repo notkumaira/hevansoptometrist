@@ -283,6 +283,67 @@ function drawAccount(){
   });
  };
  list.appendChild(card);
+ drawPushSettings();
+}
+function urlBase64ToUint8Array(value){
+ var padding="=".repeat((4-value.length%4)%4);
+ var base64=(value+padding).replace(/-/g,"+").replace(/_/g,"/");
+ var raw=atob(base64),output=new Uint8Array(raw.length);
+ for(var i=0;i<raw.length;i++)output[i]=raw.charCodeAt(i);
+ return output;
+}
+function drawPushSettings(){
+ var list=$("list"),card=el("section","card");
+ card.appendChild(el("h2","","Push notifications"));
+ card.appendChild(el("p","meta","Get an alert on this device when a new appointment request arrives. Notifications do not show patient details."));
+ var status=el("p","meta","Checking notification support…");card.appendChild(status);
+ var actions=el("div","acts"),enable=btn("Enable notifications","",async function(button){
+  button.disabled=true;status.textContent="Requesting permission…";
+  try{
+   if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window))throw new Error("Push notifications are not supported by this browser.");
+   if(Notification.permission!=="granted"){
+    var permission=await Notification.requestPermission();
+    if(permission!=="granted")throw new Error("Notifications were not allowed. You can change this in your device settings.");
+   }
+   var keyResult=await api({action:"push_public_key"});
+   if(!keyResult.ok||!keyResult.j.publicKey)throw new Error("Push notifications are not configured on the server yet.");
+   var registration=await navigator.serviceWorker.ready;
+   var subscription=await registration.pushManager.getSubscription();
+   if(!subscription)subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(keyResult.j.publicKey)});
+   var saved=await api({action:"push_subscribe",subscription:subscription.toJSON()});
+   if(!saved.ok)throw new Error(saved.j.error||"Could not save this device.");
+   status.textContent="Notifications are enabled on this device.";
+  }catch(error){status.textContent=error.message||"Could not enable notifications."}
+  button.disabled=false;
+ });
+ var disable=btn("Turn off on this device","ghost",async function(button){
+  button.disabled=true;
+  try{
+   var registration=await navigator.serviceWorker.ready;
+   var subscription=await registration.pushManager.getSubscription();
+   if(subscription){
+    await api({action:"push_unsubscribe",endpoint:subscription.endpoint});
+    await subscription.unsubscribe();
+   }
+   status.textContent="Notifications are turned off on this device.";
+  }catch(error){status.textContent=error.message||"Could not turn off notifications."}
+  button.disabled=false;
+ });
+ actions.appendChild(enable);actions.appendChild(disable);card.appendChild(actions);
+ if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window)){
+  status.textContent="This browser does not support push notifications.";
+  enable.disabled=true;disable.disabled=true;
+ }else if(Notification.permission==="denied"){
+  status.textContent="Notifications are blocked in this browser's settings. Allow them there to enable alerts.";
+  enable.disabled=true;
+ }else{
+  navigator.serviceWorker.ready.then(function(registration){
+   registration.pushManager.getSubscription().then(function(subscription){
+    status.textContent=subscription?"Notifications are enabled on this device.":"Notifications are not enabled on this device yet.";
+   });
+  }).catch(function(){status.textContent="Open this app online to set up notifications."});
+ }
+ list.appendChild(card);
 }
 function drawRevs(){
  var list=$("list");list.innerHTML="";

@@ -88,6 +88,37 @@ export default async (req) => {
   const actor = await authenticate(b.token);
   if (!actor) return j({ error: "Please sign in again." }, 401);
 
+  if (b.action === "push_public_key") {
+    return j({ publicKey: process.env.PUSH_VAPID_PUBLIC_KEY || "" });
+  }
+
+  if (b.action === "push_subscribe" || b.action === "push_unsubscribe") {
+    const pushStore = getStore("staff-push-subscriptions");
+    const endpoint = String(b.subscription?.endpoint || b.endpoint || "").trim();
+    if (!endpoint.startsWith("https://") || endpoint.length > 2048) {
+      return j({ error: "Invalid push subscription." }, 400);
+    }
+    const key = crypto.createHash("sha256").update(actor.id + ":" + endpoint).digest("hex");
+    if (b.action === "push_unsubscribe") {
+      await pushStore.delete(key);
+      return j({ ok: true });
+    }
+    const subscription = b.subscription;
+    if (!subscription || !subscription.keys?.p256dh || !subscription.keys?.auth) {
+      return j({ error: "Incomplete push subscription." }, 400);
+    }
+    await pushStore.setJSON(key, {
+      userId: actor.id,
+      endpoint,
+      keys: {
+        p256dh: String(subscription.keys.p256dh),
+        auth: String(subscription.keys.auth)
+      },
+      created: new Date().toISOString()
+    });
+    return j({ ok: true });
+  }
+
   if (b.action === "change_password") {
     try {
       const result = await changeOwnPassword(actor, b.currentPassword, b.newPassword, b.remember === true);
