@@ -24,7 +24,7 @@ function issueSession(user) {
 }
 export async function patientFromCookie(cookie) {
   if(!secret()) return null;
-  const match=String(cookie||"").match(/(?:^|;\\s*)hevans_patient_session=([^;]+)/);
+  const match=String(cookie||"").match(/(?:^|;\s*)hevans_patient_session=([^;]+)/);
   if(!match) return null;
   const [payload,signature]=decodeURIComponent(match[1]).split(".");
   if(!payload||!signature||!safeEqual(signature,sign(payload))) return null;
@@ -50,8 +50,8 @@ async function sendEmail(to,subject,html) {
 export async function createPatient(email,name,password) {
   if(!secret()) throw new Error("Patient accounts are not configured.");
   const normalized=String(email||"").trim().toLowerCase();
-  const fullName=String(name||"").trim().replace(/\\s+/g," ").slice(0,100);
-  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalized)||normalized.length>254) return {error:"Enter a valid email address.",status:400};
+  const fullName=String(name||"").trim().replace(/\s+/g," ").slice(0,100);
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)||normalized.length>254) return {error:"Enter a valid email address.",status:400};
   if(fullName.length<2) return {error:"Enter your full name.",status:400};
   if(typeof password!=="string"||password.length<12||password.length>128) return {error:"Use a password of at least 12 characters.",status:400};
   const id=emailKey(normalized),store=users();
