@@ -1,7 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#141f4a"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#f1f8fb" stroke-width="26"/>
-  <circle cx="256" cy="256" r="72" fill="#34accb"/>
-  <circle cx="256" cy="256" r="30" fill="#141f4a"/>
-  <path d="M256 55v58M256 399v58M55 256h58M399 256h58" stroke="#f1f8fb" stroke-width="18" stroke-linecap="round"/>
+  <title>H Evans Optometrist Staff</title>
+  <style>
+    .bg{fill:#fbf8f1}
+    .frame{fill:none;stroke:#141f4a}
+    .accent{fill:none;stroke:#53b1dc}
+    .spark{fill:#53b1dc}
+    @media (prefers-color-scheme:dark){
+      .bg{fill:#0b1529}
+      .frame{stroke:#f6efde}
+      .accent{stroke:#deb15b}
+      .spark{fill:#deb15b}
+    }
+  </style>
+  <rect class="bg" width="512" height="512" rx="112"/>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path class="accent" d="M104 177A168 168 0 0 1 408 177" stroke-width="8"/>
+    <path class="accent" d="M104 350A168 168 0 0 0 408 350" stroke-width="8"/>
+    <path class="spark" d="M256 47c5 83 10 96 34 104-24 8-29 21-34 104-5-83-10-96-34-104 24-8 29-21 34-104Z"/>
+    <path class="spark" d="M256 319c5 57 10 68 34 77-24 9-29 20-34 77-5-57-10-68-34-77 24-9 29-20 34-77Z"/>
+    <g class="frame" stroke-width="14">
+      <path d="M65 218V211c0-14 10-23 25-23h99c37 0 59 23 55 60l-7 47c-5 36-28 56-63 56h-26c-36 0-58-21-63-57l-7-52c-2-15-6-22-13-24Z"/>
+      <path d="M447 218V211c0-14-10-23-25-23h-99c-37 0-59 23-55 60l7 47c5 36 28 56 63 56h26c36 0 58-21 63-57l7-52c2-15 6-22 13-24Z"/>
+      <path d="M240 222c8-12 24-12 32 0"/>
+      <path d="M65 215 49 209M447 215l16-6"/>
+    </g>
+    <path class="frame" d="M65 220h-3m385 0h3" stroke-width="8"/>
+  </g>
 </svg>
