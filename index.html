@@ -453,6 +453,44 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 <span class="mono">Eldorado Park · Johannesburg</span>
 </div></footer>
 
+<div id="patientInstallNudge" hidden style="position:fixed;z-index:80;left:16px;right:16px;bottom:16px;max-width:520px;margin:auto;padding:18px 20px;border:1px solid var(--line-2);border-radius:20px;background:var(--ink-2);color:var(--paper);box-shadow:0 18px 55px rgba(0,0,0,.28)">
+  <button id="patientInstallDismiss" type="button" aria-label="Dismiss app invitation" style="position:absolute;right:12px;top:8px;border:0;background:none;color:inherit;font-size:1.4rem;cursor:pointer">×</button>
+  <strong style="display:block;font:500 1.2rem var(--serif);padding-right:28px">Take H Evans Optometrist with you</strong>
+  <p style="margin:5px 0 12px;color:var(--paper-dim);font-size:.92rem">Add our free app to your Home Screen for easy access to your appointments and notifications.</p>
+  <a class="btn sm" href="/patient/?install=1">Get the app <span class="arr">→</span></a>
+</div>
+<div id="patientInstallDialog" hidden role="dialog" aria-modal="true" aria-labelledby="patientInstallTitle" style="position:fixed;z-index:100;inset:0;background:rgba(0,0,0,.68);padding:20px;align-items:center;justify-content:center">
+ <div style="width:min(100%,480px);background:var(--ink-2);color:var(--paper);border:1px solid var(--line-2);border-radius:24px;padding:26px;box-shadow:0 24px 80px rgba(0,0,0,.4)">
+  <button id="patientInstallClose" type="button" aria-label="Close" style="float:right;border:0;background:none;color:inherit;font-size:1.5rem;cursor:pointer">×</button>
+  <p class="mono">H Evans Optometrist</p><h2 id="patientInstallTitle" style="font-size:2rem;margin:0 0 12px">Get the patient app</h2>
+  <p style="color:var(--paper-dim)">Install our app for quick access to your appointments and optional notifications. You can keep booking without installing it.</p>
+  <div id="patientInstallSteps" style="line-height:1.7;margin:16px 0"></div>
+  <a class="btn" href="/patient/?install=1">Continue to app <span class="arr">→</span></a>
+  <button id="patientInstallNotNow" type="button" class="btn ghost" style="margin-left:8px">Not now</button>
+ </div>
+</div>
+<script>
+(function(){
+ var n=document.getElementById("patientInstallNudge"),d=document.getElementById("patientInstallDialog"),steps=document.getElementById("patientInstallSteps");
+ var key="hevansPatientInstallDismissed",isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent),dismissed=false;
+ try{dismissed=Date.now()-Number(localStorage.getItem(key)||0)<30*24*60*60*1000}catch(e){}
+ function close(){d.hidden=true}
+ function dismiss(){close();n.hidden=true;try{localStorage.setItem(key,String(Date.now()))}catch(e){}}
+ function show(){if(dismissed)return;steps.innerHTML=isIOS
+  ? "<ol><li>Open the patient app in <b>Safari</b>.</li><li>Tap the <b>Share</b> button.</li><li>Choose <b>Add to Home Screen</b>, then tap <b>Add</b>.</li></ol>"
+  : "<ol><li>Open the patient app.</li><li>In your browser menu, choose <b>Install app</b> or <b>Add to Home Screen</b>.</li><li>Follow the on-screen instructions.</li></ol>";
+  d.hidden=false;d.style.display="flex";
+ }
+ document.getElementById("patientInstallDismiss").onclick=dismiss;
+ document.getElementById("patientInstallNotNow").onclick=dismiss;
+ document.getElementById("patientInstallClose").onclick=close;
+ d.addEventListener("click",function(e){if(e.target===d)close()});
+ window.showPatientInstallPrompt=show;
+ if(!dismissed&&!window.matchMedia("(display-mode: standalone)").matches){setTimeout(function(){n.hidden=false},6500)}
+})();
+</script>
+
+
 <script>
 (function(){
 var WA="27659288938"; // WhatsApp number that receives booking requests
