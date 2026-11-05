@@ -134,14 +134,15 @@ function load(){
 }
 function draw(){
  var tabs=$("tabs");tabs.innerHTML="";
- [["calendar","Calendar"],["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"]].concat(currentUser&&currentUser.role==="doctor"?[["staff","Staff accounts"]]:[]).forEach(function(t){
-  var n=t[0]==="reviews"?revs.filter(function(a){return a.status==="pending"}).length:t[0]==="all"?items.length:items.filter(function(a){return a.status===t[0]}).length;
-  var b=el("button","",t[0]==="calendar"?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
+ [["calendar","Calendar"],["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"],["account","My account"]].concat(currentUser&&currentUser.role==="doctor"?[["staff","Staff accounts"]]:[]).forEach(function(t){
+  var n=t[0]==="reviews"?revs.filter(function(a){return a.status==="pending"}).length:t[0]==="all"?items.length:(["pending","confirmed","declined"].indexOf(t[0])>=0?items.filter(function(a){return a.status===t[0]}).length:0);
+  var b=el("button","",(t[0]==="calendar"||t[0]==="account"||t[0]==="staff")?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
   b.onclick=function(){tab=t[0];draw()};tabs.appendChild(b);
  });
  if(tab==="calendar"){drawCal();return}
  if(tab==="reviews"){drawRevs();return}
  if(tab==="staff"){drawStaff();return}
+ if(tab==="account"){drawAccount();return}
  var list=$("list");list.innerHTML="";
  var shown=items.filter(function(a){return tab==="all"||a.status===tab});
  if(!shown.length){var e=el("div","card","Nothing here.");e.style.color="var(--sub)";list.appendChild(e);return}
@@ -217,6 +218,43 @@ function drawStaff(){
  var submit=el("button","","Create account");submit.type="submit";form.appendChild(submit);
  form.onsubmit=function(e){e.preventDefault();submit.disabled=true;api({action:"staff_create",name:name.value,username:username.value,password:password.value}).then(function(r){submit.disabled=false;if(!r.ok){say(r.j.error||"Could not create account.",true);return}say("Staff account created.");drawStaff()})};list.appendChild(form);
  api({action:"staff_list"}).then(function(r){if(!r.ok){say(r.j.error||"Could not load staff accounts.",true);return}r.j.users.forEach(function(u){var card=el("article","card"),head=el("div","row");head.appendChild(el("h2","",u.name));head.appendChild(el("span","badge "+(u.disabled?"declined":"confirmed"),u.disabled?"disabled":"active"));card.appendChild(head);card.appendChild(el("p","meta","@"+u.username));var actions=el("div","acts");actions.appendChild(btn(u.disabled?"Enable account":"Disable account",u.disabled?"":"no",function(b){b.disabled=true;api({action:u.disabled?"staff_enable":"staff_disable",userId:u.id}).then(function(x){b.disabled=false;if(!x.ok){say(x.j.error||"Could not update account.",true);return}drawStaff()})}));card.appendChild(actions);list.appendChild(card)})});
+}
+function drawAccount(){
+ var list=$("list");list.innerHTML="";
+ var card=el("form","card");
+ card.appendChild(el("h2","","Change your password"));
+ card.appendChild(el("p","meta","Signed in as "+currentUser.name+" (@"+currentUser.username+")."));
+ function field(labelText,id,autocomplete){
+  var label=el("label","meta",labelText);label.htmlFor=id;card.appendChild(label);
+  var input=el("input");input.id=id;input.type="password";input.required=true;input.autocomplete=autocomplete;input.style.marginTop="6px";input.minLength=12;card.appendChild(input);return input;
+ }
+ var current=field("Current password","currentPassword","current-password");
+ var next=field("New password (at least 12 characters)","newPassword","new-password");
+ var confirm=field("Confirm new password","confirmPassword","new-password");
+ var hint=el("p","meta","Changing your password will sign out other devices using this account.");
+ card.appendChild(hint);
+ var submit=el("button","","Update password");submit.type="submit";card.appendChild(submit);
+ card.onsubmit=function(e){
+  e.preventDefault();
+  if(next.value!==confirm.value){say("The new passwords do not match.",true);confirm.focus();return}
+  if(next.value.length<12){say("Your new password must be at least 12 characters.",true);next.focus();return}
+  submit.disabled=true;say("");
+  var remember=false;
+  try{remember=localStorage.getItem("hev_t")===T}catch(x){}
+  api({action:"change_password",currentPassword:current.value,newPassword:next.value,remember:remember}).then(function(r){
+   submit.disabled=false;
+   if(r.status===401){logout();return}
+   if(!r.ok){say(r.j.error||"Could not change your password.",true);return}
+   T=r.j.token;currentUser=r.j.user;
+   try{
+    if(localStorage.getItem("hev_t"))localStorage.setItem("hev_t",T);
+    else sessionStorage.setItem("hev_t",T);
+   }catch(x){}
+   current.value="";next.value="";confirm.value="";
+   say("Your password has been changed. Other devices have been signed out.");
+  });
+ };
+ list.appendChild(card);
 }
 function drawRevs(){
  var list=$("list");list.innerHTML="";
