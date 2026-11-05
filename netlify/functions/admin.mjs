@@ -1,6 +1,5 @@
 // Staff only: individual staff authentication and appointment management.
-// Env vars: STAFF_SESSION_SECRET, STAFF_SETUP_SECRET, TWILIO_ACCOUNT_SID, TWILIO_API_KEY,
-// TWILIO_API_SECRET, TWILIO_WHATSAPP_FROM.
+// Env vars: STAFF_SESSION_SECRET, STAFF_SETUP_SECRET, PUSH_VAPID_PUBLIC_KEY, PUSH_VAPID_PRIVATE_KEY.
 import { getStore } from "@netlify/blobs";
 import crypto from "node:crypto";
 import { authenticate, login, bootstrapDoctor, manageStaff, changeOwnPassword } from "./lib/staff-auth.mjs";
@@ -11,13 +10,6 @@ const j = (o, s = 200) =>
   new Response(JSON.stringify(o), { status: s, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const waNumber = (p) => { let d = String(p).replace(/\D/g, ""); if (d.startsWith("0")) d = "27" + d.slice(1); return d; };
 
-function whatsappAddress(value) {
-  let number = String(value || "").trim().replace(/^whatsapp:/i, "").replace(/[\s()-]/g, "");
-  if (number.startsWith("0")) number = "+27" + number.slice(1);
-  if (!number.startsWith("+")) number = "+" + number;
-  return /^\+\d{8,15}$/.test(number) ? "whatsapp:" + number : "";
-}
-
 function message(a) {
   if (a.status === "confirmed")
     return `Hi ${a.name}, your appointment at H Evans Optometrist is confirmed.\n\n${a.service}\n${a.date} at ${a.time}\n2697 Kiepersol Street, Extension 3, Eldorado Park\n\nPlease bring your current spectacles, contact lenses and medical aid card. To change your booking, call 065 928 8938.`;
@@ -25,41 +17,6 @@ function message(a) {
 }
 const waLink = (a) => !a.whatsappConsent || a.status === "pending" ? "" : `https://wa.me/${waNumber(a.phone)}?text=${encodeURIComponent(message(a))}`;
 
-async function sendTwilioWhatsApp(to, body) {
-  const { TWILIO_ACCOUNT_SID: sid, TWILIO_API_KEY: key, TWILIO_API_SECRET: secret } = process.env;
-  const from = whatsappAddress(process.env.TWILIO_WHATSAPP_FROM);
-  const recipient = whatsappAddress(to);
-  if (!sid || !key || !secret || !from || !recipient) return false;
-
-  const auth = Buffer.from(key + ":" + secret).toString("base64");
-  const form = new URLSearchParams({ From: from, To: recipient, Body: body });
-  try {
-    const response = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(sid)}/Messages.json`,
-      {
-        method: "POST",
-        headers: { Authorization: "Basic " + auth, "Content-Type": "application/x-www-form-urlencoded" },
-        body: form,
-        signal: AbortSignal.timeout(10000),
-      }
-    );
-    if (!response.ok) {
-      const detail = await response.text();
-      console.error("Twilio patient WhatsApp confirmation failed:", response.status, detail.slice(0, 500));
-    }
-    return response.ok;
-  } catch (error) {
-    console.error("Twilio patient WhatsApp confirmation failed:", error?.message || error);
-    return false;
-  }
-}
-
-// The caller only invokes this for the first transition into "confirmed".
-// A patient must have opted in on the booking form before an automated message is sent.
-async function autoSend(a) {
-  if (a.status !== "confirmed" || a.whatsappConsent !== true) return false;
-  return sendTwilioWhatsApp(a.phone, message(a));
-}
 
 export default async (req) => {
   if (req.method !== "POST") return j({ error: "POST only" }, 405);
@@ -203,7 +160,7 @@ export default async (req) => {
     a.updatedBy = { id: actor.id, name: actor.name, username: actor.username };
     await store.setJSON(a.id, a);
     await getStore("staff-activity").setJSON(crypto.randomUUID(), { type: "appointment_status", appointmentId: a.id, status: b.status, staffId: actor.id, staffName: actor.name, at: a.updated });
-    const sent = b.status === "confirmed" && !wasConfirmed ? await autoSend(a) : false;
+    const sent = false;
     return j({ item: { ...a, wa: waLink(a) }, sent });
   }
   const rs = getStore("reviews");
