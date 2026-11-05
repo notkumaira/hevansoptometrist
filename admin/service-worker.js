@@ -1,5 +1,5 @@
-const CACHE_NAME = "h-evans-staff-shell-v1";
-const APP_SHELL = ["/admin/", "/admin/manifest.webmanifest", "/admin/icons/staff-app.svg"];
+const CACHE_NAME = "h-evans-staff-shell-v2";
+const APP_SHELL = ["/admin/", "/admin/manifest.webmanifest", "/admin/icons/staff-app.svg", "/admin/icons/staff-app-light.svg", "/admin/icons/staff-app-dark.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
