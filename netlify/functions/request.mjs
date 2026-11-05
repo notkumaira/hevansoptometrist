@@ -67,16 +67,21 @@ async function notifyStaffPush() {
       privateKey
     );
     const store = getStore("staff-push-subscriptions");
+    const users = getStore("staff-users");
     const { blobs } = await store.list();
     const subscriptions = await Promise.all(
-      blobs.map((blob) => store.get(blob.key, { type: "json" }).then((value) => ({ key: blob.key, value })))
+      blobs.map(async (blob) => {
+        const value = await store.get(blob.key, { type: "json" });
+        const user = value?.userId ? await users.get(value.userId, { type: "json" }) : null;
+        return { key: blob.key, value, active: Boolean(user && !user.disabled) };
+      })
     );
     const payload = JSON.stringify({
       title: "H Evans Optometrist",
       body: "A new appointment request has arrived. Sign in to review it.",
       url: "/admin/"
     });
-    await Promise.allSettled(subscriptions.filter((entry) => entry.value?.endpoint && entry.value?.keys)
+    await Promise.allSettled(subscriptions.filter((entry) => entry.active && entry.value?.endpoint && entry.value?.keys)
       .map(async ({ key, value }) => {
         try {
           await webpush.sendNotification(
