@@ -8,6 +8,10 @@
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/admin/manifest.webmanifest">
+<meta name="theme-color" content="#141f4a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="H Evans Staff">
 <style>
 :root{--bg:#fff;--bg2:#f1f8fb;--tx:#141f4a;--sub:#505a8a;--ln:rgba(20,31,74,.16);--ac:#34accb;--ok:#1f7a4d;--no:#b3261e;color-scheme:light}
 @media (prefers-color-scheme:dark){:root{--bg:#15120d;--bg2:#1e1a13;--tx:#f2e9d8;--sub:#bfb39b;--ln:rgba(242,233,216,.18);--ac:#eea84a;--ok:#6fcf97;--no:#ff8a7a;color-scheme:dark}}
@@ -60,7 +64,7 @@ a{color:inherit}
  <button type="submit" style="width:100%">Sign in</button>
 </form>
 <div id="app" hidden>
- <header><h1>Appointments</h1><div><button class="ghost" id="refresh" type="button">Refresh</button> <button class="ghost" id="out" type="button">Log out</button></div></header>
+ <header><h1>Appointments</h1><div><button class="ghost" id="install" type="button" hidden>Install app</button> <button class="ghost" id="refresh" type="button">Refresh</button> <button class="ghost" id="out" type="button">Log out</button></div></header>
  <div class="tabs" id="tabs" role="group" aria-label="Filter"></div>
  <p class="msg" id="msg" role="status"></p>
  <div id="list"></div>
@@ -68,6 +72,32 @@ a{color:inherit}
 </div>
 <script>
 (function(){
+var installPrompt=null;
+var installButton=document.getElementById("install");
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("/admin/service-worker.js").catch(function(error){
+      console.error("Staff app service worker registration failed:",error);
+    });
+  });
+}
+window.addEventListener("beforeinstallprompt",function(event){
+  event.preventDefault();
+  installPrompt=event;
+  if(installButton)installButton.hidden=false;
+});
+if(installButton){
+  installButton.addEventListener("click",async function(){
+    if(!installPrompt)return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt=null;
+    installButton.hidden=true;
+  });
+}
+window.addEventListener("appinstalled",function(){
+  if(installButton)installButton.hidden=true;
+});
 var T=null,items=[],revs=[],tab="calendar",cal=new Date(),calSel="";cal.setDate(1);
 try{T=localStorage.getItem("hev_t")||sessionStorage.getItem("hev_t")}catch(e){}
 var $=function(i){return document.getElementById(i)};

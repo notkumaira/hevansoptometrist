@@ -1,0 +1,19 @@
+{
+  "id": "/admin/",
+  "name": "H Evans Optometrist Staff",
+  "short_name": "H Evans Staff",
+  "description": "Staff appointment management for H Evans Optometrist.",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#f1f8fb",
+  "theme_color": "#141f4a",
+  "icons": [
+    {
+      "src": "/admin/icons/staff-app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
