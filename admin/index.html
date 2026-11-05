@@ -134,14 +134,15 @@ function load(){
 }
 function draw(){
  var tabs=$("tabs");tabs.innerHTML="";
- [["calendar","Calendar"],["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"],["account","My account"]].concat(currentUser&&currentUser.role==="doctor"?[["staff","Staff accounts"]]:[]).forEach(function(t){
+ [["calendar","Calendar"],["pending","Pending"],["confirmed","Confirmed"],["declined","Declined"],["all","All"],["reviews","Reviews"],["account","My account"]].concat(currentUser&&currentUser.role==="doctor"?[["staff","Staff accounts"],["activity","Activity log"]]:[]).forEach(function(t){
   var n=t[0]==="reviews"?revs.filter(function(a){return a.status==="pending"}).length:t[0]==="all"?items.length:(["pending","confirmed","declined"].indexOf(t[0])>=0?items.filter(function(a){return a.status===t[0]}).length:0);
-  var b=el("button","",(t[0]==="calendar"||t[0]==="account"||t[0]==="staff")?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
+  var b=el("button","",(t[0]==="calendar"||t[0]==="account"||t[0]==="staff"||t[0]==="activity")?t[1]:t[1]+" ("+n+")");b.type="button";b.setAttribute("aria-pressed",String(tab===t[0]));
   b.onclick=function(){tab=t[0];draw()};tabs.appendChild(b);
  });
  if(tab==="calendar"){drawCal();return}
  if(tab==="reviews"){drawRevs();return}
  if(tab==="staff"){drawStaff();return}
+ if(tab==="activity"){drawActivity();return}
  if(tab==="account"){drawAccount();return}
  var list=$("list");list.innerHTML="";
  var shown=items.filter(function(a){return tab==="all"||a.status===tab});
@@ -208,6 +209,33 @@ function drawCal(){
  });
 }
 function btn(t,c,f){var b=el("button",c,t);b.type="button";b.onclick=function(){f(b)};return b}
+function drawActivity(){
+ var list=$("list");list.innerHTML="";
+ var loading=el("div","card","Loading activity…");list.appendChild(loading);
+ api({action:"activity"}).then(function(r){
+  list.innerHTML="";
+  if(r.status===401){logout();return}
+  if(!r.ok){say(r.j.error||"Could not load the activity log.",true);return}
+  if(!r.j.items||!r.j.items.length){list.appendChild(el("div","card","No staff activity has been recorded yet."));return}
+  list.appendChild(el("p","meta","Showing the 100 most recent appointment changes."));
+  r.j.items.forEach(function(item){
+   var card=el("article","card"),head=el("div","row");
+   var action=item.type==="appointment_deleted"?"Deleted appointment":(item.type==="appointment_status"?"Changed appointment status":"Staff activity");
+   head.appendChild(el("h2","",action));
+   if(item.status)head.appendChild(el("span","badge "+(item.status==="confirmed"?"confirmed":(item.status==="declined"||item.status==="deleted")?"declined":"pending"),item.status));
+   card.appendChild(head);
+   card.appendChild(el("p","meta","By "+item.staffName));
+   if(item.appointment){
+    card.appendChild(el("p","",item.appointment.name+" · "+item.appointment.service));
+    card.appendChild(el("p","meta",item.appointment.date+" at "+item.appointment.time));
+   }else{
+    card.appendChild(el("p","meta","The related appointment is no longer available."));
+   }
+   if(item.at)card.appendChild(el("p","meta",new Date(item.at).toLocaleString("en-ZA",{dateStyle:"medium",timeStyle:"short"})));
+   list.appendChild(card);
+  });
+ });
+}
 function drawStaff(){
  var list=$("list");list.innerHTML="";
  var form=el("form","card");form.appendChild(el("h2","","Add staff member"));

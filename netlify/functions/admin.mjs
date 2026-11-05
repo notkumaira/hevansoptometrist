@@ -113,6 +113,30 @@ export default async (req) => {
   }
 
   const store = getStore("appointments");
+  if (b.action === "activity") {
+    if (actor.role !== "doctor") return j({ error: "Only the doctor can view the activity log." }, 403);
+    const activityStore = getStore("staff-activity");
+    const { blobs } = await activityStore.list();
+    const events = (await Promise.all(blobs.map((blob) => activityStore.get(blob.key, { type: "json" })))).filter(Boolean);
+    events.sort((a, b) => String(b.at || "").localeCompare(String(a.at || "")));
+    const recent = events.slice(0, 100);
+    const entries = await Promise.all(recent.map(async (event) => {
+      const appointment = event.appointmentId ? await store.get(event.appointmentId, { type: "json" }) : null;
+      return {
+        type: event.type || "activity",
+        status: event.status || "",
+        staffName: event.staffName || "Unknown staff member",
+        at: event.at || null,
+        appointment: appointment ? {
+          name: appointment.name || "",
+          service: appointment.service || "",
+          date: appointment.date || "",
+          time: appointment.time || ""
+        } : (event.appointmentSnapshot || null)
+      };
+    }));
+    return j({ items: entries });
+  }
   if (b.action === "list") {
     const { blobs } = await store.list();
     const items = (await Promise.all(blobs.map((x) => store.get(x.key, { type: "json" })))).filter(Boolean);
@@ -120,7 +144,24 @@ export default async (req) => {
     return j({ items: items.map((a) => ({ ...a, wa: waLink(a) })) });
   }
   if (b.action === "delete") {
-    await store.delete(String(b.id));
+    const id = String(b.id);
+    const appointment = await store.get(id, { type: "json" });
+    if (!appointment) return j({ error: "Not found" }, 404);
+    await getStore("staff-activity").setJSON(crypto.randomUUID(), {
+      type: "appointment_deleted",
+      appointmentId: id,
+      appointmentSnapshot: {
+        name: appointment.name || "",
+        service: appointment.service || "",
+        date: appointment.date || "",
+        time: appointment.time || ""
+      },
+      status: "deleted",
+      staffId: actor.id,
+      staffName: actor.name,
+      at: new Date().toISOString()
+    });
+    await store.delete(id);
     return j({ ok: true });
   }
   if (b.action === "update" && ["pending", "confirmed", "declined"].includes(b.status)) {
