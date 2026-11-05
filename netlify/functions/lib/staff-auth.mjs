@@ -86,8 +86,10 @@ export async function bootstrapDoctor(body) {
     throw new Error("Use a 3–32 character username, a name, and a password of at least 12 characters.");
   }
   const credentials = await passwordRecord(password);
+  // Use one stable owner key so simultaneous first-setup submissions cannot
+  // create multiple doctor records in the staff-users store.
   const user = {
-    id: crypto.randomUUID(), username, name, role: "doctor", disabled: false,
+    id: "doctor-owner", username, name, role: "doctor", disabled: false,
     sessionVersion: 0, created: new Date().toISOString(), ...credentials
   };
   await users().setJSON(user.id, user);
@@ -126,7 +128,14 @@ export async function manageStaff(actor, body) {
   if (body.action === "staff_list") {
     const { blobs } = await store.list();
     const records = await Promise.all(blobs.map((blob) => store.get(blob.key, { type: "json" })));
-    return { users: records.filter(Boolean).map(jsonSafe) };
+    // Older deployments may contain duplicate records from repeated setup
+    // submissions. Show one account per role + username without deleting data.
+    const unique = new Map();
+    for (const user of records.filter(Boolean)) {
+      const key = String(user.role || "") + ":" + String(user.username || "").toLowerCase();
+      if (!unique.has(key)) unique.set(key, user);
+    }
+    return { users: [...unique.values()].map(jsonSafe) };
   }
   if (body.action === "staff_create") {
     const username = String(body.username || "").trim().toLowerCase();
