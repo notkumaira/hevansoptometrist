@@ -305,7 +305,28 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 .d1{animation-delay:.1s}.d2{animation-delay:.22s}.d3{animation-delay:.36s}.d4{animation-delay:.5s}.d5{animation-delay:.64s}
 @keyframes up{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.rv,.load{opacity:1;transform:none}.hero h1 .blur{filter:none;opacity:1}.lens .lid{display:none}}
+
+/* Patient app installation invitation */
+.install-nudge{position:fixed;z-index:80;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:560px;margin:0 auto;padding:18px 20px;background:var(--paper);color:var(--ink);border:1px solid var(--line-2);border-radius:20px;box-shadow:0 18px 60px rgba(0,0,0,.28);display:none}
+.install-nudge.show{display:block;animation:installIn .25s ease-out}
+@keyframes installIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.install-nudge h3{font:500 1.35rem var(--serif);margin:0 32px 6px 0}
+.install-nudge p{font-size:.92rem;color:var(--paper-dim);margin:0 0 12px}
+.install-actions{display:flex;gap:10px;flex-wrap:wrap}
+.install-actions button{font:600 .9rem var(--sans);border:0;border-radius:999px;padding:10px 16px;cursor:pointer}
+.install-actions .install-primary{background:var(--amber);color:var(--on-accent)}
+.install-actions .install-secondary{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px var(--line-2)}
+.install-close{position:absolute;right:14px;top:12px;border:0;background:transparent;color:inherit;font-size:1.35rem;cursor:pointer}
+.install-instructions{display:none;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--ink-2);font-size:.9rem;color:var(--paper-dim)}
+.install-instructions.show{display:block}
+.install-instructions ol{margin:8px 0 0;padding-left:20px}
+.install-link{display:inline-block;margin-top:14px;font-size:.88rem}
+@media(min-width:700px){.install-nudge{left:auto;right:24px;bottom:24px}}
+
 </style>
+<link rel="manifest" href="/patient/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="H Evans">
 </head>
 <body>
 <header><div class="wrap">
@@ -446,6 +467,51 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 </div>
 </div></section>
 </main>
+
+
+<aside class="install-nudge" id="patientInstallNudge" aria-labelledby="installNudgeTitle" aria-live="polite">
+<button class="install-close" id="installNudgeClose" type="button" aria-label="Close installation invitation">×</button>
+<h3 id="installNudgeTitle">Take H Evans with you</h3>
+<p>Install our app for easier access to your appointments and optional notifications. Booking works without installing it.</p>
+<div class="install-actions">
+<button class="install-primary" id="installAppButton" type="button">Install app</button>
+<button class="install-secondary" id="installHowButton" type="button">How to install</button>
+<button class="install-secondary" id="installNotNow" type="button">Not now</button>
+</div>
+<div class="install-instructions" id="installInstructions"></div>
+<a class="install-link" href="/patient/">Open the patient app</a>
+</aside>
+<script>
+(function(){
+var box=document.getElementById("patientInstallNudge");
+if(!box)return;
+var installBtn=document.getElementById("installAppButton"),howBtn=document.getElementById("installHowButton");
+var instructions=document.getElementById("installInstructions"),deferred=null;
+var dismissedKey="hevans-patient-install-dismissed";
+var standalone=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+var dismissedAt=Number(localStorage.getItem(dismissedKey)||0);
+if(standalone||(dismissedAt&&Date.now()-dismissedAt<30*24*60*60*1000))return;
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
+function show(){box.classList.add("show")}
+function dismiss(){box.classList.remove("show");localStorage.setItem(dismissedKey,String(Date.now()))}
+function instructionsForDevice(){
+ if(isIOS())return "<strong>On iPhone or iPad</strong><ol><li>Open this website in Safari.</li><li>Tap the Share button.</li><li>Choose “Add to Home Screen”.</li><li>Tap “Add” to install.</li></ol>";
+ return "<strong>On Android</strong><ol><li>Open this website in Chrome.</li><li>Tap the browser menu (⋮).</li><li>Choose “Install app” or “Add to Home screen”.</li></ol><strong>On a computer</strong><ol><li>Look for the install icon in the address bar, or open the browser menu.</li><li>Choose “Install H Evans Optometrist”.</li></ol>";
+}
+howBtn.addEventListener("click",function(){instructions.innerHTML=instructionsForDevice();instructions.classList.toggle("show")});
+installBtn.addEventListener("click",async function(){
+ if(deferred){deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;box.classList.remove("show");return}
+ instructions.innerHTML=instructionsForDevice();instructions.classList.add("show");
+});
+document.getElementById("installNudgeClose").addEventListener("click",dismiss);
+document.getElementById("installNotNow").addEventListener("click",dismiss);
+window.addEventListener("beforeinstallprompt",function(event){event.preventDefault();deferred=event;installBtn.textContent="Install app"});
+window.addEventListener("appinstalled",function(){box.classList.remove("show");localStorage.setItem(dismissedKey,String(Date.now()))});
+if(isIOS()){installBtn.textContent="View iPhone instructions";installBtn.addEventListener("click",function(){instructions.innerHTML=instructionsForDevice();instructions.classList.add("show")})}
+setTimeout(show,2200);
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/patient/service-worker.js").catch(function(error){console.warn("Patient app service worker registration failed",error)})}
+})();
+</script>
 
 <footer><div class="wrap">
 <div class="big" aria-hidden="true">H Evans</div>

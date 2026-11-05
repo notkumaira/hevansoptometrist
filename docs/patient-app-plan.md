@@ -72,6 +72,6 @@ The staff app remains separate at `/admin/`. The patient experience will live at
 
 - The current public form posts to `/api/request`; the existing function stores guest appointments and triggers staff notifications. Preserve this behaviour while adding patient ownership safely.
 - The current staff API is `/api/admin` and requires staff authentication. Patient endpoints must be separate and must never accept staff tokens as patient authentication.
-- The current patient WhatsApp confirmation path still uses Twilio in the staff status-update function. Do not silently replace it until Meta credentials and the new sender number are configured and tested.
+- Twilio has been removed from the current code. Staff retain push alerts; patient WhatsApp contact is manual via the existing consent-gated WhatsApp link until a supported business messaging provider (preferably Meta Cloud API) is configured and tested.
 - Never send appointment details, patient identifiers, phone numbers, email addresses or clinical notes in push payloads.
 - Do not make account registration or app installation a condition of booking or receiving essential appointment communication.

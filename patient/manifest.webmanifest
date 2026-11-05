@@ -1,0 +1,19 @@
+{
+  "id": "/patient/",
+  "name": "H Evans Optometrist",
+  "short_name": "H Evans",
+  "description": "Patient app for H Evans Optometrist.",
+  "start_url": "/patient/",
+  "scope": "/patient/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#141f4a",
+  "icons": [
+    {
+      "src": "/patient/icons/patient-app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

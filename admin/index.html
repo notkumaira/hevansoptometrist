@@ -437,7 +437,7 @@ function set(a,status,b){
   if(r.status===401){logout();return}
   if(!r.ok){say(r.j.error||"Couldn’t update. Please try again.",true);return}
   items=items.map(function(x){return x.id===a.id?r.j.item:x});
-  if(status==="confirmed")say(r.j.sent?"Confirmed. WhatsApp confirmation sent to "+a.name+".":(!a.whatsappConsent?"Confirmed. No WhatsApp consent was given; please contact "+a.name+" by phone.":"Confirmed, but Twilio did not send the WhatsApp message. Check the Twilio and Netlify settings, then contact "+a.name+" manually."));
+  if(status==="confirmed")say(!a.whatsappConsent?"Confirmed. No WhatsApp consent was given; please contact "+a.name+" by phone.":"Confirmed. Automatic WhatsApp delivery is not configured yet; use the Message on WhatsApp button to contact "+a.name+".");
   else say("Updated. Please contact "+a.name+" by phone if they need to be notified.");
   draw();
  });
