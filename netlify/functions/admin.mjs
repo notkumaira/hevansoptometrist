@@ -132,7 +132,7 @@ export default async (req) => {
           service: appointment.service || "",
           date: appointment.date || "",
           time: appointment.time || ""
-        } : null
+        } : (event.appointmentSnapshot || null)
       };
     }));
     return j({ items: entries });
