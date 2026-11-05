@@ -84,6 +84,8 @@ export default async (req) => {
   const actor = await authenticate(b.token);
   if (!actor) return j({ error: "Please sign in again." }, 401);
 
+  if (b.action === "me") return j({ user: { id: actor.id, username: actor.username, name: actor.name, role: actor.role } });
+
   const staffResult = await manageStaff(actor, b);
   if (staffResult) {
     const status = staffResult.status || 200;
