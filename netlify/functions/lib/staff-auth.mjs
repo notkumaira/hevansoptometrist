@@ -94,6 +94,32 @@ export async function bootstrapDoctor(body) {
   return jsonSafe(user);
 }
 
+export async function changeOwnPassword(actor, currentPassword, newPassword, remember = false) {
+  const store = users();
+  const user = await store.get(actor.id, { type: "json" });
+  if (!user || user.disabled || (user.sessionVersion || 0) !== (actor.sessionVersion || 0)) {
+    return { error: "Your session has expired. Please sign in again.", status: 401 };
+  }
+  if (typeof currentPassword !== "string" || !(await passwordMatches(currentPassword, user))) {
+    return { error: "Your current password is incorrect.", status: 400 };
+  }
+  if (typeof newPassword !== "string" || newPassword.length < 12) {
+    return { error: "Your new password must be at least 12 characters.", status: 400 };
+  }
+  if (await passwordMatches(newPassword, user)) {
+    return { error: "Choose a password you are not already using.", status: 400 };
+  }
+
+  Object.assign(user, await passwordRecord(newPassword));
+  user.sessionVersion = (user.sessionVersion || 0) + 1;
+  user.updated = new Date().toISOString();
+  await store.setJSON(user.id, user);
+
+  // Changing the session version signs out every other device. Return a fresh
+  // token for this device so the user does not have to sign in again.
+  return { token: issueToken(user, remember === true), user: jsonSafe(user) };
+}
+
 export async function manageStaff(actor, body) {
   if (actor.role !== "doctor") return { error: "Only the doctor can manage staff accounts.", status: 403 };
   const store = users();

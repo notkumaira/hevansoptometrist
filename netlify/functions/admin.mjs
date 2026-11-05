@@ -3,7 +3,7 @@
 // TWILIO_API_SECRET, TWILIO_WHATSAPP_FROM.
 import { getStore } from "@netlify/blobs";
 import crypto from "node:crypto";
-import { authenticate, login, bootstrapDoctor, manageStaff } from "./lib/staff-auth.mjs";
+import { authenticate, login, bootstrapDoctor, manageStaff, changeOwnPassword } from "./lib/staff-auth.mjs";
 
 export const config = { path: "/api/admin" };
 
@@ -63,6 +63,10 @@ async function autoSend(a) {
 
 export default async (req) => {
   if (req.method !== "POST") return j({ error: "POST only" }, 405);
+  let b;
+  try { b = await req.json(); }
+  catch { return j({ error: "Invalid request." }, 400); }
+  if (!b || typeof b !== "object" || Array.isArray(b)) return j({ error: "Invalid request." }, 400);
   if (b.action === "bootstrap") {
     try { return j({ user: await bootstrapDoctor(b) }); }
     catch (error) { return j({ error: error.message || "Could not set up the doctor account." }, 400); }
@@ -83,6 +87,21 @@ export default async (req) => {
 
   const actor = await authenticate(b.token);
   if (!actor) return j({ error: "Please sign in again." }, 401);
+
+  if (b.action === "change_password") {
+    try {
+      const result = await changeOwnPassword(actor, b.currentPassword, b.newPassword, b.remember === true);
+      if (result.status) {
+        const status = result.status;
+        delete result.status;
+        return j(result, status);
+      }
+      return j(result);
+    } catch (error) {
+      console.error("Staff password change failed:", error?.message || error);
+      return j({ error: "Could not change your password. Please try again." }, 500);
+    }
+  }
 
   if (b.action === "me") return j({ user: { id: actor.id, username: actor.username, name: actor.name, role: actor.role } });
 
