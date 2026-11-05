@@ -155,13 +155,11 @@ export default async (req) => {
   if (b.action === "update" && ["pending", "confirmed", "declined"].includes(b.status)) {
     const a = await store.get(String(b.id), { type: "json" });
     if (!a) return j({ error: "Not found" }, 404);
-    const wasConfirmed = a.status === "confirmed";
     a.status = b.status; a.updated = new Date().toISOString();
     a.updatedBy = { id: actor.id, name: actor.name, username: actor.username };
     await store.setJSON(a.id, a);
     await getStore("staff-activity").setJSON(crypto.randomUUID(), { type: "appointment_status", appointmentId: a.id, status: b.status, staffId: actor.id, staffName: actor.name, at: a.updated });
-    const sent = false;
-    return j({ item: { ...a, wa: waLink(a) }, sent });
+    return j({ item: { ...a, wa: waLink(a) } });
   }
   const rs = getStore("reviews");
   if (b.action === "reviews") {
