@@ -79,6 +79,7 @@ a{color:inherit}
 </form>
 <div id="app" hidden>
  <header><h1>Appointments</h1><div><button class="ghost" id="install" type="button" hidden>Install app</button> <button class="ghost" id="refresh" type="button">Refresh</button> <button class="ghost" id="out" type="button">Log out</button></div></header>
+ <section class="card" id="pushPrompt" hidden></section>
  <div class="tabs" id="tabs" role="group" aria-label="Filter"></div>
  <p class="msg" id="msg" role="status"></p>
  <div id="list"></div>
@@ -128,9 +129,55 @@ function load(){
  api({action:"list"}).then(function(r){
   if(r.status===401){logout();return}
   if(!r.ok){say(r.j.error||"Couldn’t load appointments.",true);return}
-  items=r.j.items;say("");draw();
+  items=r.j.items;say("");showPushPrompt();draw();
   api({action:"reviews"}).then(function(q){if(q.ok){revs=q.j.items;draw()}});
  });
+}
+function showPushPrompt(){
+ var card=$("pushPrompt");
+ if(!card)return;
+ card.innerHTML="";
+ if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window)){
+  card.hidden=true;return;
+ }
+ if(Notification.permission==="denied"){
+  card.hidden=false;
+  card.appendChild(el("h2","","Notifications are blocked"));
+  card.appendChild(el("p","meta","Allow notifications for this site in your browser or device settings, then reopen the staff app."));
+  return;
+ }
+ navigator.serviceWorker.ready.then(function(registration){
+  registration.pushManager.getSubscription().then(function(subscription){
+   if(subscription&&Notification.permission==="granted"){card.hidden=true;return}
+   card.hidden=false;
+   card.appendChild(el("h2","","Enable staff notifications"));
+   card.appendChild(el("p","meta","Get an alert on this device whenever a new appointment request arrives. Alerts never include patient details."));
+   var enable=btn("Enable notifications","",async function(button){
+    button.disabled=true;
+    try{
+     if(Notification.permission!=="granted"){
+      var permission=await Notification.requestPermission();
+      if(permission!=="granted")throw new Error("Permission was not granted. You can enable it later in your browser settings.");
+     }
+     var keyResult=await api({action:"push_public_key"});
+     if(!keyResult.ok||!keyResult.j.publicKey)throw new Error("Push notifications are not configured on the server yet.");
+     var current=await registration.pushManager.getSubscription();
+     if(!current)current=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(keyResult.j.publicKey)});
+     var saved=await api({action:"push_subscribe",subscription:current.toJSON()});
+     if(!saved.ok)throw new Error(saved.j.error||"Could not save this device.");
+     card.hidden=true;
+     say("Notifications are enabled on this device.");
+    }catch(error){
+     var message=el("p","meta",error.message||"Could not enable notifications.");
+     card.appendChild(message);
+     button.disabled=false;
+    }
+   });
+   card.appendChild(enable);
+   var later=btn("Not now","ghost",function(){card.hidden=true});
+   card.appendChild(later);
+  }).catch(function(){card.hidden=true});
+ }).catch(function(){card.hidden=true});
 }
 function draw(){
  var tabs=$("tabs");tabs.innerHTML="";
