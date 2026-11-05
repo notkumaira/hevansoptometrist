@@ -220,7 +220,7 @@ function drawActivity(){
   list.appendChild(el("p","meta","Showing the 100 most recent appointment changes."));
   r.j.items.forEach(function(item){
    var card=el("article","card"),head=el("div","row");
-   var action=item.type==="appointment_status"?"Changed appointment status":"Staff activity";
+   var action=item.type==="appointment_deleted"?"Deleted appointment":(item.type==="appointment_status"?"Changed appointment status":"Staff activity");
    head.appendChild(el("h2","",action));
    if(item.status)head.appendChild(el("span","badge "+(item.status==="confirmed"?"confirmed":item.status==="declined"?"declined":"pending"),item.status));
    card.appendChild(head);
