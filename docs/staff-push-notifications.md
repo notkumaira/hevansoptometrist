@@ -10,7 +10,24 @@ Add these variables in Netlify under **Site configuration → Environment variab
 - `PUSH_VAPID_PRIVATE_KEY`: the matching VAPID private key. Keep this secret; never commit it to GitHub or share it in screenshots.
 - `PUSH_VAPID_SUBJECT`: a contact URI such as `mailto:admin@hevansoptometrist.co.za`.
 
-Generate a VAPID key pair once using the `web-push` package (for example, `npx web-push generate-vapid-keys`). Put the public and private values into the matching Netlify variables. Do not regenerate them after staff devices have subscribed unless you are prepared to ask everyone to enable notifications again.
+Generate the key pair locally on Windows using PowerShell (no Node.js installation is required). Paste this whole script into PowerShell:
+
+```powershell
+function ConvertTo-Base64Url([byte[]]$Bytes) {
+  [Convert]::ToBase64String($Bytes).TrimEnd('=').Replace('+','-').Replace('/','_')
+}
+$ecdsa = [System.Security.Cryptography.ECDsa]::Create([System.Security.Cryptography.ECCurve]::NamedCurves.nistP256)
+$parameters = $ecdsa.ExportParameters($true)
+$publicBytes = New-Object byte[] 65
+$publicBytes[0] = 4
+[Array]::Copy($parameters.Q.X, 0, $publicBytes, 1, 32)
+[Array]::Copy($parameters.Q.Y, 0, $publicBytes, 33, 32)
+Write-Output ("PUSH_VAPID_PUBLIC_KEY=" + (ConvertTo-Base64Url $publicBytes))
+Write-Output ("PUSH_VAPID_PRIVATE_KEY=" + (ConvertTo-Base64Url $parameters.D))
+$ecdsa.Dispose()
+```
+
+Copy the public value into `PUSH_VAPID_PUBLIC_KEY` and the private value into `PUSH_VAPID_PRIVATE_KEY` in Netlify. Keep the private value secret and never commit it to GitHub or share it in screenshots. Do not regenerate the pair after staff devices have subscribed unless you are prepared to ask everyone to enable notifications again.
 
 After saving the variables, trigger a new Netlify deploy.
 
