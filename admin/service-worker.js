@@ -1,4 +1,4 @@
-const CACHE_NAME = "h-evans-staff-shell-v3";
+const CACHE_NAME = "h-evans-staff-shell-v4";
 const APP_SHELL = ["/admin/", "/admin/manifest.webmanifest", "/admin/icons/staff-app.svg"];
 
 self.addEventListener("install", (event) => {
