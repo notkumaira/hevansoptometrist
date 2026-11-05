@@ -1,17 +1,14 @@
-// Staff only: log in, list requests, approve or decline.
-// Env vars: ADMIN_PASSWORD, TWILIO_ACCOUNT_SID, TWILIO_API_KEY,
+// Staff only: individual staff authentication and appointment management.
+// Env vars: STAFF_SESSION_SECRET, STAFF_SETUP_SECRET, TWILIO_ACCOUNT_SID, TWILIO_API_KEY,
 // TWILIO_API_SECRET, TWILIO_WHATSAPP_FROM.
 import { getStore } from "@netlify/blobs";
 import crypto from "node:crypto";
+import { authenticate, login, bootstrapDoctor, manageStaff } from "./lib/staff-auth.mjs";
 
 export const config = { path: "/api/admin" };
 
 const j = (o, s = 200) =>
   new Response(JSON.stringify(o), { status: s, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
-const secret = () => process.env.ADMIN_SECRET || process.env.ADMIN_PASSWORD || "";
-const sign = (t) => crypto.createHmac("sha256", secret()).update(String(t)).digest("hex");
-const same = (a, b) => { const x = Buffer.from(a), y = Buffer.from(b); return x.length === y.length && crypto.timingSafeEqual(x, y); };
-const valid = (tok) => { const [exp, sig] = String(tok || "").split("."); return !!(exp && sig && Number(exp) > Date.now() && same(sig, sign(exp))); };
 const waNumber = (p) => { let d = String(p).replace(/\D/g, ""); if (d.startsWith("0")) d = "27" + d.slice(1); return d; };
 
 function whatsappAddress(value) {
@@ -66,19 +63,33 @@ async function autoSend(a) {
 
 export default async (req) => {
   if (req.method !== "POST") return j({ error: "POST only" }, 405);
-  if (!process.env.ADMIN_PASSWORD) return j({ error: "Admin password is not set up yet." }, 500);
-  let b;
-  try { b = await req.json(); } catch { return j({ error: "Bad request" }, 400); }
+  if (b.action === "bootstrap") {
+    try { return j({ user: await bootstrapDoctor(b) }); }
+    catch (error) { return j({ error: error.message || "Could not set up the doctor account." }, 400); }
+  }
 
   if (b.action === "login") {
-    if (typeof b.password === "string" && same(sign(b.password), sign(process.env.ADMIN_PASSWORD))) {
-      const exp = String(Date.now() + (b.remember ? 30 * 24 : 12) * 3600e3);
-      return j({ token: exp + "." + sign(exp) });
+    try {
+      const result = await login(b.username, b.password, b.remember === true);
+      if (!result) {
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        return j({ error: "Incorrect username or password." }, 401);
+      }
+      return j(result);
+    } catch (error) {
+      return j({ error: error.message || "Login is not configured." }, 500);
     }
-    await new Promise((r) => setTimeout(r, 800));
-    return j({ error: "Wrong password" }, 401);
   }
-  if (!valid(b.token)) return j({ error: "Please sign in again" }, 401);
+
+  const actor = await authenticate(b.token);
+  if (!actor) return j({ error: "Please sign in again." }, 401);
+
+  const staffResult = await manageStaff(actor, b);
+  if (staffResult) {
+    const status = staffResult.status || 200;
+    delete staffResult.status;
+    return j(staffResult, status);
+  }
 
   const store = getStore("appointments");
   if (b.action === "list") {
@@ -96,7 +107,9 @@ export default async (req) => {
     if (!a) return j({ error: "Not found" }, 404);
     const wasConfirmed = a.status === "confirmed";
     a.status = b.status; a.updated = new Date().toISOString();
+    a.updatedBy = { id: actor.id, name: actor.name, username: actor.username };
     await store.setJSON(a.id, a);
+    await getStore("staff-activity").setJSON(crypto.randomUUID(), { type: "appointment_status", appointmentId: a.id, status: b.status, staffId: actor.id, staffName: actor.name, at: a.updated });
     const sent = b.status === "confirmed" && !wasConfirmed ? await autoSend(a) : false;
     return j({ item: { ...a, wa: waLink(a) }, sent });
   }
