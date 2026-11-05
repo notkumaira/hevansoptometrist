@@ -1,6 +1,7 @@
 // Public: saves a booking request as "pending" for staff to approve.
 import { getStore } from "@netlify/blobs";
 import webpush from "web-push";
+import { authenticatePatient } from "./lib/patient-auth.mjs";
 
 export const config = { path: "/api/request" };
 
@@ -71,6 +72,8 @@ export default async (req) => {
   };
   if (!a.service || !a.date || !/^\d{4}-\d{2}-\d{2}$/.test(a.iso) || !/^\d{2}:\d{2}$/.test(a.time) || !a.name || !a.phone)
     return j({ error: "Missing details" }, 400);
+  const patient = await authenticatePatient(req);
+  if (patient) a.patientId = patient.id;
   await getStore("appointments").setJSON(a.id, a);
   await notifyStaffPush();
   return j({ ok: true });
