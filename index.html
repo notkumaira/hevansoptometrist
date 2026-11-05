@@ -311,7 +311,11 @@ footer .big{font-family:var(--serif);font-size:clamp(3rem,12vw,10rem);line-heigh
 .install-nudge.show{display:block;animation:installIn .25s ease-out}
 @keyframes installIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .install-nudge h3{font:500 1.35rem var(--serif);margin:0 32px 6px 0}
-.install-nudge p{font-size:.92rem;color:var(--paper-dim);margin:0 0 12px}
+.install-nudge p{font-size:.92rem;color:#d5def5;margin:0 0 12px}
+.install-instructions{color:#d5def5;background:#202d5b}
+.install-instructions strong{color:#fff}
+.install-instructions li{color:#d5def5}
+.install-instructions a{color:#55d7ee}
 .install-actions{display:flex;gap:10px;flex-wrap:wrap}
 .install-actions button{font:600 .9rem var(--sans);border:0;border-radius:999px;padding:10px 16px;cursor:pointer}
 .install-actions .install-primary{background:var(--amber);color:var(--on-accent)}
@@ -492,11 +496,20 @@ var standalone=window.matchMedia("(display-mode: standalone)").matches||window.n
 var dismissedAt=Number(localStorage.getItem(dismissedKey)||0);
 if(standalone||(dismissedAt&&Date.now()-dismissedAt<30*24*60*60*1000))return;
 function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
+function isAndroid(){return /android/i.test(navigator.userAgent)}
 function show(){box.classList.add("show")}
 function dismiss(){box.classList.remove("show");localStorage.setItem(dismissedKey,String(Date.now()))}
 function instructionsForDevice(){
+ var ua=navigator.userAgent;
  if(isIOS())return "<strong>On iPhone or iPad</strong><ol><li>Open this website in Safari.</li><li>Tap the Share button.</li><li>Choose “Add to Home Screen”.</li><li>Tap “Add” to install.</li></ol>";
- return "<strong>On Android</strong><ol><li>Open this website in Chrome.</li><li>Tap the browser menu (⋮).</li><li>Choose “Install app” or “Add to Home screen”.</li></ol><strong>On a computer</strong><ol><li>Look for the install icon in the address bar, or open the browser menu.</li><li>Choose “Install H Evans Optometrist”.</li></ol>";
+ if(isAndroid())return "<strong>On Android</strong><ol><li>Open this website in Chrome.</li><li>Tap the three-dot menu.</li><li>Tap “Install app” or “Add to Home screen”.</li></ol>";
+ if(/Windows/i.test(ua)){
+  if(/Edg\//i.test(ua))return "<strong>On a Windows PC using Microsoft Edge</strong><ol><li>Open this website in Edge.</li><li>Click the three-dot menu in the top-right corner.</li><li>Choose “Apps”, then “Install this site as an app”.</li><li>Confirm by clicking “Install”.</li></ol>";
+  if(/Chrome\//i.test(ua))return "<strong>On a Windows PC using Google Chrome</strong><ol><li>Open this website in Chrome.</li><li>Click the install icon at the right end of the address bar, if it appears.</li><li>If you don’t see it, open the three-dot menu and choose “Cast, save and share” → “Install page as app”.</li><li>Click “Install” to confirm.</li></ol>";
+  return "<strong>On a Windows PC</strong><p>For the easiest installation, open this website in Google Chrome or Microsoft Edge and follow the browser-specific steps.</p>";
+ }
+ if(/Macintosh|Mac OS X/i.test(ua))return "<strong>On a Mac</strong><ol><li>Open this website in Safari.</li><li>In the menu bar, choose File → Add to Dock.</li><li>Click “Add”.</li></ol>";
+ return "<strong>Install on a computer</strong><p>Open this website in Google Chrome or Microsoft Edge. Use the install icon at the right of the address bar, or choose the browser’s app-install option from its menu.</p>";
 }
 howBtn.addEventListener("click",function(){instructions.innerHTML=instructionsForDevice();instructions.classList.toggle("show")});
 installBtn.addEventListener("click",async function(){
