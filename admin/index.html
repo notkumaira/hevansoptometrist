@@ -202,11 +202,12 @@ function draw(){
   var ph=el("p","meta");var tel=el("a","",a.phone);tel.href="tel:"+a.phone.replace(/[^\d+]/g,"");ph.appendChild(tel);
   if(a.email)ph.appendChild(document.createTextNode(" · "+a.email));c.appendChild(ph);
   if(a.notes)c.appendChild(el("p","meta","Notes: "+a.notes));
+  var wn=waNote(a);if(wn)c.appendChild(wn);
   var acts=el("div","acts");
   if(a.status!=="confirmed")acts.appendChild(btn("Approve","",function(b){set(a,"confirmed",b)}));
   if(a.status!=="declined")acts.appendChild(btn(a.status==="confirmed"?"Cancel":"Decline","no",function(b){set(a,"declined",b)}));
   if(a.status==="declined")acts.appendChild(btn("Delete","no",function(b){del(a,b)}));
-  if(a.wa){var w=el("a","btn ghost",a.status==="confirmed"?"Message on WhatsApp":"Message on WhatsApp");w.href=a.wa;w.target="_blank";w.rel="noopener";acts.appendChild(w)}
+  waButtons(a,acts);
   c.appendChild(acts);list.appendChild(c);
  });
 }
@@ -248,11 +249,49 @@ function drawCal(){
   cd.appendChild(el("p","meta",a.service));
   var ph=el("p","meta");var tel=el("a","",a.phone);tel.href="tel:"+a.phone.replace(/[^\d+]/g,"");ph.appendChild(tel);cd.appendChild(ph);
   if(a.notes)cd.appendChild(el("p","meta","Notes: "+a.notes));
+  var wn=waNote(a);if(wn)cd.appendChild(wn);
   var acts=el("div","acts");
   if(a.status!=="confirmed")acts.appendChild(btn("Approve","",function(b){set(a,"confirmed",b)}));
   acts.appendChild(btn(a.status==="confirmed"?"Cancel":"Decline","no",function(b){set(a,"declined",b)}));
-  if(a.wa){var w=el("a","btn ghost","Message on WhatsApp");w.href=a.wa;w.target="_blank";w.rel="noopener";acts.appendChild(w)}
+  waButtons(a,acts);
   cd.appendChild(acts);list.appendChild(cd);
+ });
+}
+function when(iso){return new Date(iso).toLocaleString("en-ZA",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}
+function waNote(a){
+ if(a.status!=="confirmed")return null;
+ if(!a.whatsappConsent)return el("p","meta","No WhatsApp consent. Please phone the patient to confirm.");
+ if(a.whatsappConfirmedAt)return el("p","meta","✓ WhatsApp confirmation sent by "+((a.whatsappConfirmedBy&&a.whatsappConfirmedBy.name)||"a staff member")+" · "+when(a.whatsappConfirmedAt));
+ return null;
+}
+function waButtons(a,acts){
+ if(a.status==="confirmed"&&a.whatsappConsent){
+  if(!a.whatsappConfirmedAt)acts.appendChild(btn("Confirm via WhatsApp","",function(b){sendWa(a,b)}));
+  else if(currentUser&&currentUser.role==="doctor")acts.appendChild(btn("Allow resend","ghost",function(b){resetWa(a,b)}));
+ }
+ if(a.wa){var w=el("a","btn ghost","Message on WhatsApp");w.href=a.wa;w.target="_blank";w.rel="noopener";acts.appendChild(w)}
+}
+function sendWa(a,b){
+ var win=window.open("","_blank"); // opened straight away so the browser allows it
+ b.disabled=true;
+ api({action:"whatsapp_confirm",id:a.id}).then(function(r){
+  b.disabled=false;
+  if(r.status===401){if(win)win.close();logout();return}
+  if(r.j&&r.j.item)items=items.map(function(x){return x.id===a.id?r.j.item:x});
+  if(!r.ok){if(win)win.close();say(r.j.error||"Couldn’t prepare the WhatsApp message.",true);draw();return}
+  if(win){win.location.href=r.j.link;say("WhatsApp is open with the confirmation for "+a.name+". Press send in WhatsApp to deliver it.")}
+  else{var m=$("msg");m.className="msg";m.textContent="Your browser blocked the pop-up. ";var l=el("a","btn","Open WhatsApp message");l.href=r.j.link;l.target="_blank";l.rel="noopener";m.appendChild(l)}
+  draw();
+ });
+}
+function resetWa(a,b){
+ if(!confirm("Allow another WhatsApp confirmation to be sent to "+a.name+"?"))return;
+ b.disabled=true;
+ api({action:"whatsapp_reset",id:a.id}).then(function(r){
+  b.disabled=false;
+  if(r.status===401){logout();return}
+  if(!r.ok){say(r.j.error||"Couldn’t update. Please try again.",true);return}
+  items=items.map(function(x){return x.id===a.id?r.j.item:x});say("Done. A new WhatsApp confirmation can be sent.");draw();
  });
 }
 function btn(t,c,f){var b=el("button",c,t);b.type="button";b.onclick=function(){f(b)};return b}
@@ -267,7 +306,7 @@ function drawActivity(){
   list.appendChild(el("p","meta","Showing the 100 most recent appointment changes."));
   r.j.items.forEach(function(item){
    var card=el("article","card"),head=el("div","row");
-   var action=item.type==="appointment_deleted"?"Deleted appointment":(item.type==="appointment_status"?"Changed appointment status":"Staff activity");
+   var action=item.type==="appointment_deleted"?"Deleted appointment":item.type==="appointment_status"?"Changed appointment status":item.type==="whatsapp_confirmation"?"Sent WhatsApp confirmation":item.type==="whatsapp_confirmation_reset"?"Allowed a WhatsApp resend":"Staff activity";
    head.appendChild(el("h2","",action));
    if(item.status)head.appendChild(el("span","badge "+(item.status==="confirmed"?"confirmed":(item.status==="declined"||item.status==="deleted")?"declined":"pending"),item.status));
    card.appendChild(head);
@@ -437,7 +476,7 @@ function set(a,status,b){
   if(r.status===401){logout();return}
   if(!r.ok){say(r.j.error||"Couldn’t update. Please try again.",true);return}
   items=items.map(function(x){return x.id===a.id?r.j.item:x});
-  if(status==="confirmed")say(!a.whatsappConsent?"Confirmed. No WhatsApp consent was given; please contact "+a.name+" by phone.":"Confirmed. Automatic WhatsApp delivery is not configured yet; use the Message on WhatsApp button to contact "+a.name+".");
+  if(status==="confirmed")say(!a.whatsappConsent?"Confirmed. No WhatsApp consent was given; please contact "+a.name+" by phone.":"Confirmed. Press “Confirm via WhatsApp” on their card to send "+a.name+" the confirmation.");
   else say("Updated. Please contact "+a.name+" by phone if they need to be notified.");
   draw();
  });
