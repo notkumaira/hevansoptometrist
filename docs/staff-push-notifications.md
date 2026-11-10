@@ -47,4 +47,4 @@ On iPhone and iPad, first use Safari's **Share → Add to Home Screen**, open th
 - Each device is subscribed separately. Staff can turn off notifications for a device under **My account**.
 - Disabled staff accounts are skipped when new alerts are sent.
 - Push delivery is best-effort. A push failure does not stop a patient booking request from being saved.
-- Existing WhatsApp notification configuration is unchanged.
+- WhatsApp confirmations to patients are sent by staff with the **Confirm via WhatsApp** button; no WhatsApp configuration is needed.
