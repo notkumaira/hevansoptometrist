@@ -8,14 +8,22 @@ export const config = { path: "/api/admin" };
 
 const j = (o, s = 200) =>
   new Response(JSON.stringify(o), { status: s, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
-const waNumber = (p) => { let d = String(p).replace(/\D/g, ""); if (d.startsWith("0")) d = "27" + d.slice(1); return d; };
+const waNumber = (p) => {
+  let d = String(p || "").replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  else if (d.startsWith("270")) d = "27" + d.slice(3); // "+27 (0)82..." typed with the trunk zero
+  else if (d.startsWith("0")) d = "27" + d.slice(1);
+  return d.length >= 10 && d.length <= 15 ? d : "";
+};
 
 function message(a) {
   if (a.status === "confirmed")
     return `Hi ${a.name}, your appointment at H Evans Optometrist is confirmed.\n\n${a.service}\n${a.date} at ${a.time}\n2697 Kiepersol Street, Extension 3, Eldorado Park\n\nPlease bring your current spectacles, contact lenses and medical aid card. To change your booking, call 065 928 8938.`;
   return `Hi ${a.name}, sorry, we can't fit you in for ${a.service} on ${a.date} at ${a.time}. Please book another time at hevansoptometrist.co.za or call 065 928 8938.`;
 }
-const waLink = (a) => !a.whatsappConsent || a.status === "pending" ? "" : `https://wa.me/${waNumber(a.phone)}?text=${encodeURIComponent(message(a))}`;
+// The confirmation link is handed out once, by the whatsapp_confirm action below. The list only carries the "declined" message link.
+const waLink = (a) => !a.whatsappConsent || a.status !== "declined" || !waNumber(a.phone) ? "" : `https://wa.me/${waNumber(a.phone)}?text=${encodeURIComponent(message(a))}`;
+const confirmLink = (a) => `https://wa.me/${waNumber(a.phone)}?text=${encodeURIComponent(message({ ...a, status: "confirmed" }))}`;
 
 
 export default async (req) => {
@@ -101,6 +109,31 @@ export default async (req) => {
   }
 
   const store = getStore("appointments");
+
+  // One-time "Confirm via WhatsApp": records which staff member sent it, then returns the pre-written message link once.
+  if (b.action === "whatsapp_confirm" || b.action === "whatsapp_reset") {
+    const a = await store.get(String(b.id || ""), { type: "json" });
+    if (!a) return j({ error: "Not found" }, 404);
+    const item = (x) => ({ ...x, wa: waLink(x) });
+    const snapshot = { name: a.name || "", service: a.service || "", date: a.date || "", time: a.time || "" };
+    if (b.action === "whatsapp_reset") {
+      if (actor.role !== "doctor") return j({ error: "Only the doctor can allow a resend." }, 403);
+      delete a.whatsappConfirmedAt; delete a.whatsappConfirmedBy;
+      await store.setJSON(a.id, a);
+      await getStore("staff-activity").setJSON(crypto.randomUUID(), { type: "whatsapp_confirmation_reset", appointmentId: a.id, appointmentSnapshot: snapshot, staffId: actor.id, staffName: actor.name, at: new Date().toISOString() });
+      return j({ item: item(a) });
+    }
+    if (a.status !== "confirmed") return j({ error: "Approve the appointment first.", item: item(a) }, 400);
+    if (!a.whatsappConsent) return j({ error: "The patient did not agree to WhatsApp messages. Please phone them.", item: item(a) }, 400);
+    if (a.whatsappConfirmedAt) return j({ error: "A WhatsApp confirmation was already sent by " + (a.whatsappConfirmedBy?.name || "a staff member") + ".", item: item(a) }, 409);
+    if (!waNumber(a.phone)) return j({ error: "That phone number doesn’t look right for WhatsApp. Please phone the patient.", item: item(a) }, 400);
+    a.whatsappConfirmedAt = new Date().toISOString();
+    a.whatsappConfirmedBy = { id: actor.id, name: actor.name, username: actor.username };
+    await store.setJSON(a.id, a);
+    await getStore("staff-activity").setJSON(crypto.randomUUID(), { type: "whatsapp_confirmation", appointmentId: a.id, appointmentSnapshot: snapshot, staffId: actor.id, staffName: actor.name, at: a.whatsappConfirmedAt });
+    return j({ item: item(a), link: confirmLink(a) });
+  }
+
   if (b.action === "activity") {
     if (actor.role !== "doctor") return j({ error: "Only the doctor can view the activity log." }, 403);
     const activityStore = getStore("staff-activity");
@@ -156,6 +189,7 @@ export default async (req) => {
     const a = await store.get(String(b.id), { type: "json" });
     if (!a) return j({ error: "Not found" }, 404);
     a.status = b.status; a.updated = new Date().toISOString();
+    if (b.status !== "confirmed") { delete a.whatsappConfirmedAt; delete a.whatsappConfirmedBy; } // a new confirmation is needed if it is approved again
     a.updatedBy = { id: actor.id, name: actor.name, username: actor.username };
     await store.setJSON(a.id, a);
     await getStore("staff-activity").setJSON(crypto.randomUUID(), { type: "appointment_status", appointmentId: a.id, status: b.status, staffId: actor.id, staffName: actor.name, at: a.updated });
